@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Home &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <section class="balance-hero is-settled" aria-labelledby="balance-heading">
+    <p class="eyebrow" id="balance-heading">You are settled up</p>
+    <p class="money-hero mb-1">&#8377;0.00</p>
+    <p class="text-body-secondary mb-0 small">
+      Nothing owed either way. Add an expense to get started.
+    </p>
+  </section>
+
+  <h2 class="section-title">This month</h2>
+  <div class="card-flat">
+    <ul class="ledger mb-0">
+      <li>
+        <span class="who">Total spent</span>
+        <span class="lead-dots"></span>
+        <span class="amount">&#8377;0.00</span>
+      </li>
+      <li>
+        <span class="who">Your share</span>
+        <span class="lead-dots"></span>
+        <span class="amount">&#8377;0.00</span>
+      </li>
+    </ul>
+  </div>
+
+  <h2 class="section-title">Recent</h2>
+  <div class="card-flat">
+    <p class="empty mb-0">
+      No expenses yet.<br>
+      <span class="small">Tap <strong>Add</strong> to record the first one.</span>
+    </p>
+  </div>
+
+  <p class="text-body-secondary small mt-4 mb-0">
+    Signed in as {{ user.name }} &middot;
+    <a href="{% url 'accounts:logout' %}"
+       onclick="event.preventDefault();document.getElementById('logout-form').submit();">Log out</a>
+  </p>
+  <form id="logout-form" method="post" action="{% url 'accounts:logout' %}" class="d-none">
+    {% csrf_token %}
+  </form>
+{% endblock %}

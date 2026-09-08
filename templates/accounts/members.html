@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Flatmates &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="h5 mb-0">Flatmates</h1>
+    {% if user.is_staff %}
+      <a class="btn btn-primary btn-sm ms-auto" href="{% url 'accounts:invite' %}">Add</a>
+    {% endif %}
+  </div>
+
+  <div class="card-flat">
+    <ul class="ledger mb-0">
+      {% for member in members %}
+        <li>
+          <span class="avatar-chip me-1">{{ member.initials }}</span>
+          <span class="who">
+            {{ member.name }}
+            {% if not member.is_current_member %}
+              <span class="note d-block">Moved out{% if member.left_on %} &middot; {{ member.left_on|date:"j M Y" }}{% endif %}</span>
+            {% elif not member.has_usable_login %}
+              <span class="note d-block">Invite not used yet</span>
+            {% elif member.upi_id %}
+              <span class="note d-block">{{ member.upi_id }}</span>
+            {% endif %}
+          </span>
+          <span class="lead-dots"></span>
+          {% if user.is_staff %}
+            <a class="small" href="{% url 'accounts:member_edit' member.pk %}">Edit</a>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li><span class="empty w-100">No flatmates yet.</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}

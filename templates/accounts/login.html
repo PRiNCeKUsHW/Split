@@ -1,0 +1,46 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#3a34c9">
+  <title>Log in &middot; FlatSplit</title>
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <link rel="icon" href="{% static 'icons/icon-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body style="padding-bottom:0">
+  <div class="auth-wrap">
+
+    <p class="auth-mark"><span style="color:var(--indigo)">&#8377;</span> FlatSplit</p>
+    <p class="text-body-secondary mb-4">The flat's ledger.</p>
+
+    {% if form.errors %}
+      <div class="alert alert-danger py-2 px-3" role="alert">
+        That username and password don't match. Try again.
+      </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg w-100">Log in</button>
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    </form>
+
+    <p class="text-body-secondary small mt-4 mb-0">
+      No account yet? Ask whoever set up FlatSplit to send you an invite link.
+    </p>
+
+  </div>
+</body>
+</html>

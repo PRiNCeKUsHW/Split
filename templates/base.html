@@ -1,0 +1,57 @@
+{% load static %}<!doctype html>
+<html lang="en" data-bs-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#3a34c9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FlatSplit">
+  <title>{% block title %}FlatSplit{% endblock %}</title>
+
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <link rel="icon" href="{% static 'icons/icon-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
+
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+
+  <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+  {% block topbar %}
+    <header class="topbar">
+      <a class="brand" href="{% url 'core:dashboard' %}">
+        <span class="mark">&#8377;</span> FlatSplit
+      </a>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        {% block topbar_actions %}{% endblock %}
+        <a class="avatar-chip" href="{% url 'accounts:profile' %}"
+           title="{{ user.name }} &middot; your profile">{{ user.initials }}</a>
+      </div>
+    </header>
+  {% endblock %}
+
+  <main class="container px-3 py-3" style="max-width: 560px;">
+    {% include "partials/_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/_nav.html" %}
+
+  <script src="{% static 'vendor/bootstrap.bundle.min.js' %}" defer></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js").catch(function (err) {
+          // Chrome refuses workers on insecure origins other than localhost.
+          // The app still works; only offline caching is lost. See the README.
+          console.info("Service worker not registered:", err.message);
+        });
+      });
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
