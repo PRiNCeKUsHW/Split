@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Edit expense{% else %}Add an expense{% endif %} &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-3">{% if is_edit %}Edit expense{% else %}New expense{% endif %}</h1>
+
+  <form id="expense-form"
+        method="post"
+        enctype="multipart/form-data"
+        hx-post="{% if is_edit %}{% url 'expenses:edit' expense.pk %}{% else %}{% url 'expenses:add' %}{% endif %}"
+        hx-target="#form-body"
+        hx-swap="outerHTML"
+        hx-encoding="multipart/form-data">
+    {% csrf_token %}
+    {% include "expenses/partials/_expense_form_body.html" %}
+  </form>
+{% endblock %}

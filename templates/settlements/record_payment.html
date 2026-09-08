@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Pay {{ recipient.name }} &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-1">Pay {{ recipient.name }}</h1>
+  <p class="text-body-secondary small mb-3">
+    Pay them however you like, then record it here.
+    It only counts once {{ recipient.name }} confirms it.
+  </p>
+
+  {% if upi_link %}
+    <div class="card-flat text-center mb-3">
+      <p class="eyebrow mb-2">Pay by UPI</p>
+      {% if qr %}
+        <img src="{{ qr }}" alt="UPI QR code for {{ recipient.name }}" class="qr-image mb-3">
+      {% endif %}
+      <a class="btn btn-primary btn-lg w-100" href="{{ upi_link }}">
+        Open {{ recipient.upi_id }}
+      </a>
+      <p class="form-text small mb-0 mt-2">
+        Opens GPay, PhonePe or Paytm. Scan the code from another phone.
+      </p>
+    </div>
+  {% else %}
+    <div class="alert alert-secondary py-2 px-3 small" role="status">
+      {{ recipient.name }} has no UPI ID saved, so there is nothing to tap.
+      Pay by cash or bank transfer, then record it below.
+    </div>
+  {% endif %}
+
+  <h2 class="section-title">Record the payment</h2>
+  <form method="post" enctype="multipart/form-data" class="card-flat">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2 px-3">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <label class="form-label" for="{{ form.amount.id_for_label }}">Amount</label>
+    <div class="amount-field mb-2" style="font-size: 1.5rem">
+      <span class="amount-symbol">&#8377;</span>
+      {{ form.amount }}
+    </div>
+    {% for error in form.amount.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+    {% if suggested %}
+      <p class="form-text small mb-3">
+        Suggested from the settle-up plan: &#8377;{{ suggested|floatformat:2 }}
+      </p>
+    {% endif %}
+
+    <p class="eyebrow mb-2">How</p>
+    <div class="tab-row mb-3">
+      {% for choice in form.method %}
+        <label class="tab">
+          {{ choice.tag }}
+          <span>{{ choice.choice_label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <label class="form-label" for="{{ form.date.id_for_label }}">Date</label>
+    {{ form.date }}
+
+    <label class="form-label mt-3" for="{{ form.note.id_for_label }}">Note</label>
+    {{ form.note }}
+
+    <label class="form-label mt-3" for="{{ form.proof.id_for_label }}">Screenshot (optional)</label>
+    {{ form.proof }}
+
+    <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">
+      Record this payment
+    </button>
+  </form>
+{% endblock %}

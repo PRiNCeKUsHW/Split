@@ -1,4 +1,3 @@
-{% load static %}
 {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
 <nav class="bottom-nav" aria-label="Main">
 
@@ -12,8 +11,8 @@
     <span>Home</span>
   </a>
 
-  <a href="{% url 'core:dashboard' %}"
-     class="{% if ns == 'expenses' %}active{% endif %}">
+  <a href="{% url 'expenses:list' %}"
+     class="{% if ns == 'expenses' and name != 'add' %}active{% endif %}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/>
@@ -21,7 +20,7 @@
     <span>Expenses</span>
   </a>
 
-  <a href="{% url 'core:dashboard' %}" class="nav-add" aria-label="Add an expense">
+  <a href="{% url 'expenses:add' %}" class="nav-add" aria-label="Add an expense">
     <span class="fab">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
            stroke-linecap="round" aria-hidden="true">
@@ -31,7 +30,7 @@
     <span>Add</span>
   </a>
 
-  <a href="{% url 'core:dashboard' %}"
+  <a href="{% url 'settlements:settle_up' %}"
      class="{% if ns == 'settlements' %}active{% endif %}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -40,12 +39,11 @@
     <span>Settle</span>
   </a>
 
-  <a href="{% url 'accounts:members' %}"
-     class="{% if ns == 'accounts' %}active{% endif %}">
+  <a href="{% url 'core:summary' %}"
+     class="{% if ns == 'accounts' or name == 'summary' or name == 'balances' or ns == 'recurring' %}active{% endif %}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/>
-      <path d="M16 5.5a3.2 3.2 0 0 1 0 6"/><path d="M18 14.8c2.3.6 3.9 2.5 3.9 5.2"/>
+      <path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>
     </svg>
     <span>Flat</span>
   </a>

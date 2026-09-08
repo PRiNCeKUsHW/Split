@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Settle up &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="h5 mb-0">Settle up</h1>
+    {% if pending_count %}
+      <a class="badge-soft ms-auto" href="{% url 'settlements:pending' %}">
+        {{ pending_count }} to confirm
+      </a>
+    {% endif %}
+  </div>
+
+  <section class="balance-hero {% if my_balance.is_owed %}is-credit{% elif my_balance.owes %}is-debit{% else %}is-settled{% endif %} mb-3">
+    <p class="eyebrow">
+      {% if my_balance.is_owed %}You are owed
+      {% elif my_balance.owes %}You owe
+      {% else %}You are settled up{% endif %}
+    </p>
+    <p class="money-hero mb-0 {% if my_balance.is_owed %}credit{% elif my_balance.owes %}debit{% endif %}">
+      &#8377;{{ my_balance.magnitude|floatformat:2 }}
+    </p>
+  </section>
+
+  <h2 class="section-title">The shortest way to square up</h2>
+  <div class="card-flat">
+    {% if transfers %}
+      <ul class="ledger mb-0">
+        {% for transfer in transfers %}
+          <li{% if transfer.involves_me %} class="fw-medium"{% endif %}>
+            <span class="who">
+              {{ transfer.from_user.name }} &rarr; {{ transfer.to_user.name }}
+              {% if transfer.i_pay %}
+                <span class="note d-block">Your payment</span>
+              {% elif transfer.involves_me %}
+                <span class="note d-block">Coming to you</span>
+              {% endif %}
+            </span>
+            <span class="lead-dots"></span>
+            <span class="amount">&#8377;{{ transfer.amount|floatformat:2 }}</span>
+            {% if transfer.i_pay %}
+              <a class="badge-soft ms-2" href="{% url 'settlements:record' transfer.to_user.pk %}">Pay</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="form-text small mb-0 mt-3">
+        {{ transfers|length }} payment{{ transfers|pluralize }} clears the whole flat.
+      </p>
+    {% else %}
+      <p class="empty mb-0">
+        Everyone is square.<br>
+        <span class="small">No payments needed.</span>
+      </p>
+    {% endif %}
+  </div>
+
+  <div class="d-flex gap-2 mt-4">
+    <a class="btn btn-outline-secondary flex-grow-1" href="{% url 'settlements:pending' %}">Confirmations</a>
+    <a class="btn btn-outline-secondary flex-grow-1" href="{% url 'settlements:history' %}">History</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edit template{% else %}New template{% endif %} &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-3">{% if object %}Edit template{% else %}New recurring template{% endif %}</h1>
+
+  <form method="post" class="card-flat">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2 px-3">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="form-text small">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary btn-lg w-100">Save template</button>
+  </form>
+
+  {% if object %}
+    <form method="post" action="{% url 'recurring:delete' object.pk %}" class="mt-3"
+          data-confirm="Delete this template? Expenses it already made are kept.">
+      {% csrf_token %}
+      <button class="btn btn-outline-danger w-100" type="submit">Delete template</button>
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+    });
+  });
+</script>
+{% endblock %}

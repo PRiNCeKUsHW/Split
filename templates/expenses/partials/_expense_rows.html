@@ -1,0 +1,37 @@
+{% for expense in expenses %}
+  <li>
+    <span class="cat-dot" style="background: {{ expense.category.color }}"></span>
+    <span class="who">
+      <a class="text-reset text-decoration-none" href="{% url 'expenses:detail' expense.pk %}">
+        {{ expense.description }}
+      </a>
+      <span class="note d-block">
+        {{ expense.date|date:"j M" }} &middot; {{ expense.category.name }} &middot;
+        {{ expense.paid_by.name }} paid
+        {% if expense.is_draft %}<span class="badge-soft ms-1">needs amount</span>{% endif %}
+      </span>
+    </span>
+    <span class="lead-dots"></span>
+    <span class="amount">
+      {% if expense.amount %}&#8377;{{ expense.amount|floatformat:2 }}{% else %}&mdash;{% endif %}
+    </span>
+  </li>
+{% empty %}
+  <li class="d-block">
+    <p class="empty mb-0">
+      Nothing here.<br>
+      <span class="small">Try a different month, or add an expense.</span>
+    </p>
+  </li>
+{% endfor %}
+
+{% if page_obj.has_next %}
+  <li class="d-block text-center" id="load-more">
+    <button class="btn btn-outline-secondary btn-sm w-100"
+            hx-get="?page={{ page_obj.next_page_number }}{% if querystring %}&amp;{{ querystring }}{% endif %}"
+            hx-target="#load-more"
+            hx-swap="outerHTML">
+      Load more
+    </button>
+  </li>
+{% endif %}

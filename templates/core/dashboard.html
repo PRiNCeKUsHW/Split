@@ -3,44 +3,142 @@
 {% block title %}Home &middot; FlatSplit{% endblock %}
 
 {% block content %}
-  <section class="balance-hero is-settled" aria-labelledby="balance-heading">
-    <p class="eyebrow" id="balance-heading">You are settled up</p>
-    <p class="money-hero mb-1">&#8377;0.00</p>
+
+  {# The one question this app exists to answer, in the first line. #}
+  <section class="balance-hero {% if balance.is_owed %}is-credit{% elif balance.owes %}is-debit{% else %}is-settled{% endif %}"
+           aria-labelledby="balance-heading">
+    <p class="eyebrow" id="balance-heading">
+      {% if balance.is_owed %}You are owed
+      {% elif balance.owes %}You owe
+      {% else %}You are settled up{% endif %}
+    </p>
+    <p class="money-hero mb-1 {% if balance.is_owed %}credit{% elif balance.owes %}debit{% endif %}">
+      &#8377;{{ balance.magnitude|floatformat:2 }}
+    </p>
     <p class="text-body-secondary mb-0 small">
-      Nothing owed either way. Add an expense to get started.
+      {% if balance.is_settled %}
+        Nothing owed either way.
+      {% else %}
+        Paid &#8377;{{ balance.paid|floatformat:2 }} &middot; your share &#8377;{{ balance.owed|floatformat:2 }}
+      {% endif %}
     </p>
   </section>
 
-  <h2 class="section-title">This month</h2>
+  {% if pending %}
+    <div class="card-flat mt-3 border-warning-subtle">
+      <p class="eyebrow mb-2">Waiting for you to confirm</p>
+      {% for settlement in pending %}
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="flex-grow-1">
+            {{ settlement.from_user.name }} says they sent you
+            <strong class="money">&#8377;{{ settlement.amount|floatformat:2 }}</strong>
+          </span>
+        </div>
+      {% endfor %}
+      <a class="btn btn-primary w-100" href="{% url 'settlements:pending' %}">Review {{ pending|length }} payment{{ pending|length|pluralize }}</a>
+    </div>
+  {% endif %}
+
+  {% if drafts %}
+    <div class="card-flat mt-3">
+      <p class="eyebrow mb-2">Needs an amount</p>
+      <ul class="ledger mb-0">
+        {% for draft in drafts %}
+          <li>
+            <span class="who">
+              {{ draft.description }}
+              <span class="note d-block">{{ draft.date|date:"j M" }} &middot; {{ draft.category.name }}</span>
+            </span>
+            <span class="lead-dots"></span>
+            <a class="badge-soft" href="{% url 'expenses:detail' draft.pk %}">Fill in</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <h2 class="section-title">Who pays whom</h2>
+  <div class="card-flat">
+    {% if transfers %}
+      <ul class="ledger mb-0">
+        {% for transfer in transfers %}
+          <li{% if transfer.involves_me %} class="fw-medium"{% endif %}>
+            <span class="who">
+              {{ transfer.from_user.name }} &rarr; {{ transfer.to_user.name }}
+              {% if transfer.involves_me %}
+                <span class="note d-block">
+                  {% if transfer.i_pay %}You pay this one{% else %}Owed to you{% endif %}
+                </span>
+              {% endif %}
+            </span>
+            <span class="lead-dots"></span>
+            <span class="amount">&#8377;{{ transfer.amount|floatformat:2 }}</span>
+            {% if transfer.i_pay %}
+              <a class="badge-soft ms-2" href="{% url 'settlements:record' transfer.to_user.pk %}">Pay</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty mb-0">Everyone is square.<br><span class="small">No payments needed.</span></p>
+    {% endif %}
+  </div>
+
+  <h2 class="section-title">{{ month_label }} so far</h2>
   <div class="card-flat">
     <ul class="ledger mb-0">
       <li>
-        <span class="who">Total spent</span>
+        <span class="who">Flat total</span>
         <span class="lead-dots"></span>
-        <span class="amount">&#8377;0.00</span>
+        <span class="amount">&#8377;{{ month_total|floatformat:2 }}</span>
       </li>
       <li>
         <span class="who">Your share</span>
         <span class="lead-dots"></span>
-        <span class="amount">&#8377;0.00</span>
+        <span class="amount">&#8377;{{ my_month_share|floatformat:2 }}</span>
       </li>
     </ul>
   </div>
 
-  <h2 class="section-title">Recent</h2>
+  <h2 class="section-title d-flex align-items-center">
+    Recent
+    <a class="ms-auto small fw-normal" href="{% url 'expenses:list' %}">See all</a>
+  </h2>
   <div class="card-flat">
-    <p class="empty mb-0">
-      No expenses yet.<br>
-      <span class="small">Tap <strong>Add</strong> to record the first one.</span>
-    </p>
+    {% if recent %}
+      <ul class="ledger mb-0">
+        {% for expense in recent %}
+          <li>
+            <span class="who">
+              <a class="text-reset text-decoration-none" href="{% url 'expenses:detail' expense.pk %}">
+                {{ expense.description }}
+              </a>
+              <span class="note d-block">
+                {{ expense.date|date:"j M" }} &middot; {{ expense.paid_by.name }} paid
+              </span>
+            </span>
+            <span class="lead-dots"></span>
+            <span class="amount">
+              {% if expense.amount %}&#8377;{{ expense.amount|floatformat:2 }}{% else %}&mdash;{% endif %}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty mb-0">
+        No expenses yet.<br>
+        <span class="small">Tap <strong>Add</strong> to record the first one.</span>
+      </p>
+    {% endif %}
   </div>
 
-  <p class="text-body-secondary small mt-4 mb-0">
-    Signed in as {{ user.name }} &middot;
-    <a href="{% url 'accounts:logout' %}"
-       onclick="event.preventDefault();document.getElementById('logout-form').submit();">Log out</a>
-  </p>
-  <form id="logout-form" method="post" action="{% url 'accounts:logout' %}" class="d-none">
-    {% csrf_token %}
-  </form>
+  <div class="d-flex flex-wrap gap-2 mt-4">
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'core:balances' %}">Balances</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'core:summary' %}">Summary</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'accounts:away' %}">Away days</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'recurring:list' %}">Recurring</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'accounts:members' %}">Flatmates</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'core:audit' %}">Activity</a>
+  </div>
+
 {% endblock %}

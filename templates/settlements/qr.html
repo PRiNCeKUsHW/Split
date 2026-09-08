@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Pay {{ recipient.name }} &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <div class="card-flat text-center">
+    <p class="eyebrow mb-1">Scan to pay</p>
+    <h1 class="h5 mb-1">{{ recipient.name }}</h1>
+    <p class="money-hero mb-3" style="font-size: 2rem">&#8377;{{ amount|floatformat:2 }}</p>
+
+    {% if qr %}
+      <img src="{{ qr }}" alt="UPI QR code for {{ recipient.name }}" class="qr-image mb-3">
+      <p class="text-body-secondary small mb-0">{{ recipient.upi_id }}</p>
+    {% else %}
+      <p class="empty mb-0">{{ recipient.name }} has no UPI ID saved.</p>
+    {% endif %}
+  </div>
+{% endblock %}

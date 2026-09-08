@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Balances &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-1">Balances</h1>
+  <p class="text-body-secondary small mb-3">
+    What each person paid out, minus what they used, plus what they have settled.
+  </p>
+
+  <div class="card-flat">
+    <ul class="ledger mb-0">
+      {% for row in rows %}
+        <li>
+          <span class="avatar-chip">{{ row.user.initials }}</span>
+          <span class="who">
+            {{ row.user.name }}
+            <span class="note d-block">
+              paid &#8377;{{ row.paid|floatformat:2 }} &middot;
+              share &#8377;{{ row.owed|floatformat:2 }}
+              {% if row.sent %}&middot; sent &#8377;{{ row.sent|floatformat:2 }}{% endif %}
+              {% if row.received %}&middot; got &#8377;{{ row.received|floatformat:2 }}{% endif %}
+            </span>
+          </span>
+          <span class="lead-dots"></span>
+          <span class="amount {% if row.is_owed %}credit{% elif row.owes %}debit{% endif %}">
+            {% if row.is_owed %}+{% elif row.owes %}&minus;{% endif %}&#8377;{{ row.magnitude|floatformat:2 }}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {% if closed_months %}
+    <h2 class="section-title">Closed months</h2>
+    <div class="card-flat">
+      <ul class="ledger mb-0">
+        {% for closure in closed_months %}
+          <li>
+            <span class="who">{{ closure }}</span>
+            <span class="lead-dots"></span>
+            <span class="note">{{ closure.closed_by.name }}, {{ closure.closed_at|date:"j M" }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

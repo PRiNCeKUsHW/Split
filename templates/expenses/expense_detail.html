@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ expense.description }} &middot; FlatSplit{% endblock %}
+
+{% block content %}
+
+  <div class="card-flat mb-3">
+    <p class="eyebrow mb-1">{{ expense.category.name }}</p>
+    <h1 class="h5 mb-1">{{ expense.description }}</h1>
+    <p class="money-hero mb-2" style="font-size: 2.25rem">
+      {% if expense.amount %}&#8377;{{ expense.amount|floatformat:2 }}{% else %}&mdash;{% endif %}
+    </p>
+    <p class="text-body-secondary small mb-0">
+      {{ expense.paid_by.name }} paid &middot; {{ expense.date|date:"j M Y" }}
+      {% if expense.period_days > 1 %}
+        <br>Covers {{ expense.period_start|date:"j M" }} &ndash; {{ expense.period_end|date:"j M" }}
+        ({{ expense.period_days }} days)
+      {% endif %}
+      {% if expense.source_template %}<br>Generated from a recurring template{% endif %}
+    </p>
+    {% if expense.notes %}<p class="small mt-2 mb-0">{{ expense.notes }}</p>{% endif %}
+  </div>
+
+  {% if expense.is_draft %}
+    <div class="card-flat mb-3">
+      {% include "expenses/partials/_draft_form.html" %}
+    </div>
+  {% endif %}
+
+  {% if month_closed %}
+    <div class="alert alert-secondary py-2 px-3 small" role="status">
+      {{ expense.date|date:"F Y" }} is closed, so this expense is read-only.
+      Reopen the month from the summary screen to change it.
+    </div>
+  {% endif %}
+
+  {% if shares %}
+    <h2 class="section-title">The split</h2>
+    <div class="card-flat">
+      <ul class="ledger mb-0">
+        {% for share in shares %}
+          <li>
+            <span class="avatar-chip">{{ share.user.initials }}</span>
+            <span class="who">
+              {{ share.user.name }}
+              {% if share.basis %}<span class="note d-block">{{ share.basis }}</span>{% endif %}
+            </span>
+            <span class="lead-dots"></span>
+            <span class="amount">&#8377;{{ share.amount_owed|floatformat:2 }}</span>
+          </li>
+        {% endfor %}
+        <li class="fw-semibold">
+          <span class="who">Total</span>
+          <span class="lead-dots"></span>
+          <span class="amount">&#8377;{{ expense.shares_total|floatformat:2 }}</span>
+        </li>
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if expense.receipt %}
+    <h2 class="section-title">Receipt</h2>
+    <a href="{{ expense.receipt.url }}" target="_blank" rel="noopener">
+      <img src="{{ expense.receipt.url }}" alt="Receipt for {{ expense.description }}"
+           class="receipt-image">
+    </a>
+  {% endif %}
+
+  <h2 class="section-title">Comments</h2>
+  <div class="card-flat" id="comments">
+    {% include "expenses/partials/_comments.html" %}
+  </div>
+
+  {% if history %}
+    <h2 class="section-title">History</h2>
+    <div class="card-flat">
+      <ul class="ledger mb-0">
+        {% for entry in history %}
+          <li>
+            <span class="who">
+              {{ entry.actor.name|default:"Somebody" }} {{ entry.get_action_display|lower }}
+              {% if entry.changed_fields %}
+                <span class="note d-block">Changed: {{ entry.changed_fields|join:", " }}</span>
+              {% endif %}
+            </span>
+            <span class="lead-dots"></span>
+            <span class="note">{{ entry.created_at|date:"j M, H:i" }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if not month_closed %}
+    <div class="d-flex gap-2 mt-4">
+      <a class="btn btn-outline-secondary flex-grow-1" href="{% url 'expenses:edit' expense.pk %}">Edit</a>
+      <form method="post" action="{% url 'expenses:delete' expense.pk %}" class="flex-grow-1"
+            data-confirm="Delete this expense? It stays in the history.">
+        {% csrf_token %}
+        <button class="btn btn-outline-danger w-100" type="submit">Delete</button>
+      </form>
+    </div>
+  {% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Confirm destructive posts without inline handlers in the markup.
+  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+    });
+  });
+</script>
+{% endblock %}

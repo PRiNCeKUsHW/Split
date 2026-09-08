@@ -1,0 +1,18 @@
+<div id="split-preview">
+  {% if preview_error %}
+    <p class="text-danger small mb-0">{{ preview_error }}</p>
+  {% elif preview %}
+    <ul class="ledger mb-0">
+      {% for row in preview %}
+        <li>
+          <span class="who">
+            {{ row.person.name }}
+            {% if row.days is not None %}<span class="note d-block">{{ row.days }} day{{ row.days|pluralize }}</span>{% endif %}
+          </span>
+          <span class="lead-dots"></span>
+          <span class="amount">&#8377;{{ row.amount|floatformat:2 }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

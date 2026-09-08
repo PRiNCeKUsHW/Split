@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Recurring &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="h5 mb-0">Recurring</h1>
+    <a class="btn btn-primary btn-sm ms-auto" href="{% url 'recurring:add' %}">Add</a>
+  </div>
+
+  <div class="card-flat mb-3">
+    {% if templates %}
+      <ul class="ledger mb-0">
+        {% for template in templates %}
+          <li>
+            <span class="cat-dot" style="background: {{ template.category.color }}"></span>
+            <span class="who">
+              <a class="text-reset text-decoration-none" href="{% url 'recurring:edit' template.pk %}">
+                {{ template.description }}
+              </a>
+              <span class="note d-block">
+                Day {{ template.day_of_month }} &middot; {{ template.get_frequency_display|lower }}
+                {% if not template.is_active %}&middot; paused{% endif %}
+              </span>
+            </span>
+            <span class="lead-dots"></span>
+            <span class="amount">
+              {% if template.is_variable %}varies{% else %}&#8377;{{ template.amount|floatformat:2 }}{% endif %}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty mb-0">
+        No templates yet.<br>
+        <span class="small">Add rent, WiFi or the maid so they appear every month.</span>
+      </p>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{% url 'recurring:generate' %}">
+    {% csrf_token %}
+    <button class="btn btn-outline-secondary w-100" type="submit">
+      Generate {{ this_month }} now
+    </button>
+  </form>
+  <p class="form-text small mt-2">
+    Running this twice is harmless &mdash; nothing gets duplicated.
+    Set it up as a cron job and forget about it.
+  </p>
+{% endblock %}

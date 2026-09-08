@@ -1,0 +1,22 @@
+{% if comments %}
+  <ul class="ledger mb-3">
+    {% for comment in comments %}
+      <li class="d-block">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="avatar-chip">{{ comment.author.initials }}</span>
+          <strong class="small">{{ comment.author.name }}</strong>
+          <span class="note ms-auto">{{ comment.created_at|date:"j M, H:i" }}</span>
+        </div>
+        <p class="mb-0 small">{{ comment.body|linebreaksbr }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<form hx-post="{% url 'expenses:comment' expense.pk %}"
+      hx-target="#comments"
+      hx-swap="innerHTML">
+  {% csrf_token %}
+  {{ comment_form.body }}
+  <button class="btn btn-outline-secondary btn-sm mt-2" type="submit">Post comment</button>
+</form>

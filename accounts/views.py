@@ -6,7 +6,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import FormView, ListView, UpdateView
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import FormView, ListView, UpdateView, View
 
 from accounts.forms import FlatLoginForm, InviteFlatmateForm, MemberProfileForm
 from accounts.models import User
@@ -100,3 +102,66 @@ class ProfileView(UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Profile updated.")
         return super().form_valid(form)
+
+
+class AwayPeriodListView(ListView):
+    template_name = "accounts/away_list.html"
+    context_object_name = "periods"
+
+    def get_queryset(self):
+        from accounts.models import AwayPeriod
+
+        return AwayPeriod.objects.select_related("user")
+
+    def get_context_data(self, **kwargs):
+        from accounts.forms import AwayPeriodForm
+
+        context = super().get_context_data(**kwargs)
+        context["form"] = AwayPeriodForm(actor=self.request.user)
+        context["mine"] = [p for p in context["periods"] if p.user_id == self.request.user.pk]
+        return context
+
+
+class AwayPeriodCreateView(FormView):
+    template_name = "accounts/away_list.html"
+    success_url = reverse_lazy("accounts:away")
+
+    def get_form_class(self):
+        from accounts.forms import AwayPeriodForm
+
+        return AwayPeriodForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["actor"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        period = form.save()
+        messages.success(
+            self.request,
+            f"Marked {period.user.name} away for {period.days} day"
+            f"{'s' if period.days != 1 else ''}.",
+        )
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        from accounts.models import AwayPeriod
+
+        return self.render_to_response(
+            self.get_context_data(
+                form=form, periods=AwayPeriod.objects.select_related("user")
+            )
+        )
+
+
+class AwayPeriodDeleteView(View):
+    def post(self, request, pk):
+        from accounts.models import AwayPeriod
+
+        period = get_object_or_404(AwayPeriod, pk=pk)
+        if period.user_id != request.user.pk and not request.user.is_staff:
+            raise PermissionDenied("You can only remove your own away days.")
+        period.delete()
+        messages.success(request, "Removed.")
+        return redirect("accounts:away")

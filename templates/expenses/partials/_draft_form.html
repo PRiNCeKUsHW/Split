@@ -1,0 +1,16 @@
+<p class="eyebrow mb-2">This bill needs an amount</p>
+<form hx-post="{% url 'expenses:draft_amount' expense.pk %}"
+      hx-target="closest .card-flat"
+      hx-swap="outerHTML">
+  {% csrf_token %}
+  <div class="d-flex gap-2 align-items-start">
+    <div class="amount-field flex-grow-1 mb-0" style="font-size: 1.25rem">
+      <span class="amount-symbol">&#8377;</span>
+      {{ draft_form.amount }}
+    </div>
+    <button class="btn btn-primary" type="submit">Split it</button>
+  </div>
+  {% for error in draft_form.amount.errors %}
+    <div class="text-danger small mt-2">{{ error }}</div>
+  {% endfor %}
+</form>

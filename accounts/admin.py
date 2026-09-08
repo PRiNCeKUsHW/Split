@@ -24,3 +24,15 @@ class FlatmateAdmin(UserAdmin):
             },
         ),
     )
+
+
+from accounts.models import AwayPeriod
+
+
+@admin.register(AwayPeriod)
+class AwayPeriodAdmin(admin.ModelAdmin):
+    list_display = ("user", "start_date", "end_date", "days", "reason")
+    list_filter = ("user",)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user")

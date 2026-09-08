@@ -1,0 +1,115 @@
+{% load static %}
+<div id="form-body"
+     x-data="{ split: '{{ form.split_type.value|default:"EQUAL" }}' }">
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger py-2 px-3" role="alert">
+      {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    </div>
+  {% endif %}
+
+  {# Amount first: it is the only field people always have to type. #}
+  <div class="amount-field mb-3">
+    <span class="amount-symbol">&#8377;</span>
+    {{ form.amount }}
+  </div>
+  {% for error in form.amount.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+
+  <div class="mb-3">
+    {{ form.description }}
+    {% for error in form.description.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+  </div>
+
+  <p class="eyebrow mb-2">Category</p>
+  <div class="chip-row mb-3">
+    {% for choice in form.category %}
+      <label class="chip">
+        {{ choice.tag }}
+        <span>{{ choice.choice_label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+  {% for error in form.category.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+
+  <div class="row g-2 mb-3">
+    <div class="col-7">
+      <label class="form-label" for="{{ form.paid_by.id_for_label }}">Paid by</label>
+      {{ form.paid_by }}
+    </div>
+    <div class="col-5">
+      <label class="form-label" for="{{ form.date.id_for_label }}">Date</label>
+      {{ form.date }}
+    </div>
+  </div>
+  {% for error in form.date.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+
+  <p class="eyebrow mb-2">Split</p>
+  <div class="tab-row mb-3">
+    {% for choice in form.split_type %}
+      <label class="tab" :class="{ 'is-active': split === '{{ choice.data.value }}' }">
+        <input type="radio" name="split_type" value="{{ choice.data.value }}"
+               x-model="split"
+               {% if choice.data.selected %}checked{% endif %}>
+        <span>{{ choice.choice_label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+
+  <div class="card-flat mb-3">
+    <p class="eyebrow mb-2">Who's in</p>
+    <ul class="ledger mb-0">
+      {% for row in form.participant_rows %}
+        <li>
+          <label class="who d-flex align-items-center gap-2 flex-grow-1 mb-0">
+            <input type="checkbox" name="participants" value="{{ row.person.pk }}"
+                   class="form-check-input mt-0"
+                   {% if row.person.pk in form.participants.value %}checked{% endif %}>
+            <span class="avatar-chip">{{ row.person.initials }}</span>
+            <span>{{ row.person.name }}</span>
+          </label>
+
+          <span class="split-input" x-show="split === 'EXACT'" x-cloak>{{ row.exact }}</span>
+          <span class="split-input" x-show="split === 'PERCENT'" x-cloak>{{ row.percent }}</span>
+          <span class="split-input" x-show="split === 'SHARES'" x-cloak>{{ row.units }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+    {% for error in form.participants.errors %}<div class="text-danger small mt-2">{{ error }}</div>{% endfor %}
+  </div>
+
+  <details class="mb-3">
+    <summary class="eyebrow" style="cursor:pointer">More options</summary>
+    <div class="pt-3">
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="form-label" for="{{ form.period_start.id_for_label }}">Period from</label>
+          {{ form.period_start }}
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="{{ form.period_end.id_for_label }}">Period to</label>
+          {{ form.period_end }}
+        </div>
+      </div>
+      <p class="form-text small mt-0 mb-3">
+        Set a period for a bill that covers several days &mdash; groceries, gas,
+        the maid. Away days are then counted across that window.
+      </p>
+      {% for error in form.period_end.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+
+      <label class="form-label" for="{{ form.notes.id_for_label }}">Notes</label>
+      {{ form.notes }}
+
+      <label class="form-label mt-3" for="{{ form.receipt.id_for_label }}">Receipt photo</label>
+      {{ form.receipt }}
+    </div>
+  </details>
+
+  <button type="submit" class="btn btn-primary btn-lg w-100">
+    {% if is_edit %}Save changes{% else %}Add expense{% endif %}
+  </button>
+
+  {% if is_edit %}
+    <a class="btn btn-link w-100 mt-2 text-body-secondary"
+       href="{% url 'expenses:detail' expense.pk %}">Cancel</a>
+  {% endif %}
+</div>

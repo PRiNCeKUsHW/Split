@@ -18,3 +18,9 @@ urlpatterns = [
         name="set_password",
     ),
 ]
+
+urlpatterns += [
+    path("away/", views.AwayPeriodListView.as_view(), name="away"),
+    path("away/add/", views.AwayPeriodCreateView.as_view(), name="away_add"),
+    path("away/<int:pk>/delete/", views.AwayPeriodDeleteView.as_view(), name="away_delete"),
+]

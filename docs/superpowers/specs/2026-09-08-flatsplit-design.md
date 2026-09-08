@@ -164,9 +164,16 @@ Additions the brief implies but does not name. Flagging them rather than smuggli
 ```
 net(u) = sum(expenses u paid, non-draft, not deleted)
        - sum(u's shares)
-       - sum(confirmed settlements u sent)
-       + sum(confirmed settlements u received)
+       + sum(confirmed settlements u sent)
+       - sum(confirmed settlements u received)
 ```
+
+**Correction (2026-09-08, during phase 4):** an earlier revision of this
+document had the settlement signs reversed. Paying someone back reduces what
+you owe, so a *sent* settlement moves your balance **up**; receiving one moves
+it **down**. Worked check: A pays ₹100 split evenly, so A is +50 and B is −50.
+B then settles ₹50 to A. B: `0 − 50 + 50 = 0`. A: `100 − 50 − 50 = 0`. Both
+land on zero, as they must. The reversed version drove B to −100.
 
 `PENDING` and `REJECTED` settlements are invisible to balances. Summed in paise, converted
 to `Decimal` once at the end. `simplify_debts` is greedy largest-creditor / largest-debtor,

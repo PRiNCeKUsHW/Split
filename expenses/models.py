@@ -116,6 +116,17 @@ class Expense(models.Model):
     is_draft = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
 
+    # Set when a recurring template produced this expense. It is what makes
+    # `generate_recurring` idempotent: the month is checked against this link
+    # before anything is created.
+    source_template = models.ForeignKey(
+        "recurring.RecurringExpense",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="generated_expenses",
+    )
+
     objects = ExpenseQuerySet.as_manager()
 
     class Meta:

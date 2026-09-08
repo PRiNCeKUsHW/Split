@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Activity &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-1">Activity</h1>
+  <p class="text-body-secondary small mb-3">
+    Every change to an expense or a payment, in order.
+  </p>
+
+  <div class="card-flat">
+    {% if entries %}
+      <ul class="ledger mb-0">
+        {% for entry in entries %}
+          <li>
+            <span class="who">
+              {{ entry.actor.name|default:"Somebody" }}
+              {{ entry.get_action_display|lower }}
+              <span class="note d-block">
+                {{ entry.label }}
+                {% if entry.changed_fields %}<br>Changed: {{ entry.changed_fields|join:", " }}{% endif %}
+              </span>
+            </span>
+            <span class="lead-dots"></span>
+            <span class="note">{{ entry.created_at|date:"j M, H:i" }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty mb-0">Nothing has happened yet.</p>
+    {% endif %}
+  </div>
+
+  {% if page_obj.has_next %}
+    <a class="btn btn-outline-secondary w-100 mt-3"
+       href="?page={{ page_obj.next_page_number }}">Older</a>
+  {% endif %}
+{% endblock %}

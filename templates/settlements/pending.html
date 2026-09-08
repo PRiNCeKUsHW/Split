@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmations &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-1">Confirmations</h1>
+  <p class="text-body-secondary small mb-3">
+    A payment only changes the balances once you confirm you received it.
+  </p>
+
+  <h2 class="section-title">Waiting for you</h2>
+  <div class="card-flat">
+    {% if settlements %}
+      {% for settlement in settlements %}
+        <div class="pending-row">
+          <div class="d-flex align-items-baseline gap-2 mb-1">
+            <span class="avatar-chip">{{ settlement.from_user.initials }}</span>
+            <span class="flex-grow-1">
+              <strong>{{ settlement.from_user.name }}</strong>
+              <span class="note d-block">
+                {{ settlement.get_method_display }} &middot; {{ settlement.date|date:"j M" }}
+                {% if settlement.note %}&middot; {{ settlement.note }}{% endif %}
+              </span>
+            </span>
+            <span class="money fw-semibold">&#8377;{{ settlement.amount|floatformat:2 }}</span>
+          </div>
+
+          {% if settlement.proof %}
+            <a href="{{ settlement.proof.url }}" target="_blank" rel="noopener"
+               class="small d-inline-block mb-2">View the screenshot</a>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <form method="post" action="{% url 'settlements:confirm' settlement.pk %}" class="flex-grow-1">
+              {% csrf_token %}
+              <button class="btn btn-primary w-100" type="submit">Got it</button>
+            </form>
+            <form method="post" action="{% url 'settlements:reject' settlement.pk %}" class="flex-grow-1">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger w-100" type="submit">Not received</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty mb-0">
+        Nothing to confirm.<br>
+        <span class="small">Payments sent to you show up here.</span>
+      </p>
+    {% endif %}
+  </div>
+
+  {% if mine_pending %}
+    <h2 class="section-title">Your payments, waiting on them</h2>
+    <div class="card-flat">
+      <ul class="ledger mb-0">
+        {% for settlement in mine_pending %}
+          <li>
+            <span class="who">
+              {{ settlement.to_user.name }}
+              <span class="note d-block">Sent {{ settlement.date|date:"j M" }} &middot; not confirmed yet</span>
+            </span>
+            <span class="lead-dots"></span>
+            <span class="amount">&#8377;{{ settlement.amount|floatformat:2 }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="h5 mb-0">Expenses</h1>
+    <a class="btn btn-primary btn-sm ms-auto" href="{% url 'expenses:add' %}">Add</a>
+  </div>
+
+  <div class="month-scroll mb-2">
+    <a class="month-pill {% if not active_month %}is-active{% endif %}"
+       href="{% url 'expenses:list' %}">All</a>
+    {% for month in months %}
+      <a class="month-pill {% if active_month == month.value %}is-active{% endif %}"
+         href="?month={{ month.value }}">{{ month.label }}</a>
+    {% endfor %}
+  </div>
+
+  <form method="get" class="mb-3">
+    <input type="hidden" name="month" value="{{ active_month }}">
+    <div class="row g-2">
+      <div class="col-6">{{ filter_form.category }}</div>
+      <div class="col-6">{{ filter_form.paid_by }}</div>
+      <div class="col-12">{{ filter_form.involving }}</div>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm w-100 mt-2" type="submit">Apply filters</button>
+  </form>
+
+  <div class="card-flat">
+    <ul class="ledger mb-0" id="expense-rows">
+      {% include "expenses/partials/_expense_rows.html" %}
+    </ul>
+  </div>
+{% endblock %}

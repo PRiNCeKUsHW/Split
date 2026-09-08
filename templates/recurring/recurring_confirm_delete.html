@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Delete template &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-3">Delete {{ object.description }}?</h1>
+  <p class="text-body-secondary">
+    Expenses this template already generated are kept. Only the template goes.
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-outline-danger btn-lg w-100" type="submit">Delete template</button>
+  </form>
+  <a class="btn btn-link w-100 mt-2 text-body-secondary" href="{% url 'recurring:list' %}">Cancel</a>
+{% endblock %}

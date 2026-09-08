@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Settlement history &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-3">Settlement history</h1>
+
+  <div class="card-flat">
+    {% if settlements %}
+      <ul class="ledger mb-0">
+        {% for settlement in settlements %}
+          <li>
+            <span class="who">
+              {{ settlement.from_user.name }} &rarr; {{ settlement.to_user.name }}
+              <span class="note d-block">
+                {{ settlement.date|date:"j M Y" }} &middot; {{ settlement.get_method_display }}
+                &middot;
+                {% if settlement.status == "CONFIRMED" %}
+                  <span class="credit">confirmed</span>
+                {% elif settlement.status == "REJECTED" %}
+                  <span class="debit">rejected</span>
+                {% else %}
+                  waiting
+                {% endif %}
+              </span>
+            </span>
+            <span class="lead-dots"></span>
+            <span class="amount">&#8377;{{ settlement.amount|floatformat:2 }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty mb-0">No payments recorded yet.</p>
+    {% endif %}
+  </div>
+
+  {% if page_obj.has_next %}
+    <a class="btn btn-outline-secondary w-100 mt-3"
+       href="?page={{ page_obj.next_page_number }}">Older</a>
+  {% endif %}
+{% endblock %}

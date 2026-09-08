@@ -85,3 +85,38 @@ class User(AbstractUser):
     def has_usable_login(self) -> bool:
         """False while an invited flatmate has not yet set a password."""
         return self.has_usable_password()
+
+
+class AwayPeriod(models.Model):
+    """Days a flatmate was not in the flat.
+
+    Both ends are inclusive: 5–8 September means four days not paid for.
+    That is the rule people can hold in their head — "mark every day you
+    weren't here for dinner" — and the date picker maps to it one to one.
+    """
+
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="away_periods"
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.CharField(max_length=80, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-start_date", "-id"]
+        indexes = [models.Index(fields=["user", "start_date", "end_date"])]
+
+    def __str__(self) -> str:
+        return f"{self.user} away {self.start_date} to {self.end_date}"
+
+    def clean(self) -> None:
+        from django.core.exceptions import ValidationError
+
+        super().clean()
+        if self.end_date and self.start_date and self.end_date < self.start_date:
+            raise ValidationError({"end_date": "The last day is before the first day."})
+
+    @property
+    def days(self) -> int:
+        return (self.end_date - self.start_date).days + 1
