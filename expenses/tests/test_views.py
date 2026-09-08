@@ -342,3 +342,62 @@ def test_filling_a_draft_logs_the_amount_appearing(
     ).first()
     assert entry is not None, "filling a draft wrote no audit entry"
     assert entry.changes.get("amount") == [None, "2400.00"]
+
+
+# ---------------------------------------------------------------- preview
+
+
+def test_the_split_preview_shows_each_persons_amount(
+    logged_in, groceries, anuj, priya, rohit
+):
+    response = logged_in.post(
+        reverse("expenses:preview"),
+        _post_data(groceries, anuj, priya, rohit, amount="900.00"),
+        headers={"HX-Request": "true"},
+    )
+
+    assert response.status_code == 200
+    assert b"300.00" in response.content
+
+
+def test_the_preview_reflects_away_days_before_you_save(
+    logged_in, groceries, anuj, priya, rohit
+):
+    """The point of the preview: see the proration before committing."""
+    from accounts.models import AwayPeriod
+
+    AwayPeriod.objects.create(
+        user=rohit, start_date=dt.date(2026, 9, 1), end_date=dt.date(2026, 9, 10)
+    )
+    data = _post_data(
+        groceries, anuj, priya, rohit,
+        amount="3000.00", period_start="2026-09-01", period_end="2026-09-30",
+    )
+
+    body = logged_in.post(
+        reverse("expenses:preview"), data, headers={"HX-Request": "true"}
+    ).content.decode()
+
+    assert "750.00" in body    # Rohit, 20 days
+    assert "1,125.00" in body or "1125.00" in body
+    assert "20 days" in body
+
+
+def test_the_preview_writes_nothing(logged_in, groceries, anuj, priya, rohit):
+    logged_in.post(
+        reverse("expenses:preview"),
+        _post_data(groceries, anuj, priya, rohit),
+        headers={"HX-Request": "true"},
+    )
+
+    assert Expense.objects.count() == 0
+
+
+def test_the_preview_is_quiet_with_no_amount(logged_in, groceries, anuj, priya, rohit):
+    response = logged_in.post(
+        reverse("expenses:preview"),
+        _post_data(groceries, anuj, priya, rohit, amount=""),
+        headers={"HX-Request": "true"},
+    )
+
+    assert response.status_code == 200

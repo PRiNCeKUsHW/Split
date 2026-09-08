@@ -77,6 +77,19 @@
     {% for error in form.participants.errors %}<div class="text-danger small mt-2">{{ error }}</div>{% endfor %}
   </div>
 
+  {# Live preview, so away-day proration is visible before you commit to it. #}
+  <div class="card-flat mb-3"
+       hx-post="{% url 'expenses:preview' %}"
+       hx-trigger="change from:#form-body, keyup changed delay:500ms from:#form-body"
+       hx-include="#form-body"
+       hx-target="#split-preview"
+       hx-swap="outerHTML">
+    <p class="eyebrow mb-2">Each person pays</p>
+    <div id="split-preview">
+      <p class="text-body-secondary small mb-0">Enter an amount to see the split.</p>
+    </div>
+  </div>
+
   <details class="mb-3">
     <summary class="eyebrow" style="cursor:pointer">More options</summary>
     <div class="pt-3">
