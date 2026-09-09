@@ -249,6 +249,111 @@ On Windows, use Task Scheduler with the same command.
 
 ---
 
+## Running it on a phone with Termux
+
+An old Android phone makes a good always-on host: it is silent, sips power,
+and is already on the flat's WiFi. Install Termux from F-Droid — the Play
+Store build is abandoned and will not work.
+
+```bash
+pkg update && pkg upgrade
+pkg install python git libjpeg-turbo libpng zlib freetype
+```
+
+Those four libraries are not optional. Pillow builds against them, and
+`pip install Pillow` fails on a bare Termux with a compiler error that does
+not obviously say so.
+
+```bash
+git clone https://github.com/PRiNCeKUsHW/Split.git flatsplit
+cd flatsplit
+
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env
+python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"
+#   paste that into SECRET_KEY in .env
+
+python manage.py migrate
+python manage.py make_icons
+python manage.py createsuperuser
+```
+
+### Starting it
+
+```bash
+termux-wake-lock          # or Android suspends the process when the screen sleeps
+./run.sh
+```
+
+If `./run.sh` reports "no such file or directory", the shebang is the problem:
+Termux has no real `/usr/bin/env`. Either run `termux-fix-shebang run.sh
+backup.sh` once, or just call it as `bash run.sh`.
+
+`termux-wake-lock` matters more than anything else here. Without it Android
+will freeze the server the moment the screen turns off, and the app becomes
+unreachable until you unlock the phone. Release it with `termux-wake-unlock`.
+
+There is no systemd on Termux, so the unit file above does not apply. To keep
+it running after you close Termux:
+
+```bash
+pkg install termux-services
+mkdir -p $PREFIX/var/service/flatsplit
+cat > $PREFIX/var/service/flatsplit/run <<'EOF'
+#!/data/data/com.termux/files/usr/bin/sh
+exec 2>&1
+cd /data/data/com.termux/files/home/flatsplit
+exec ./run.sh
+EOF
+chmod +x $PREFIX/var/service/flatsplit/run
+sv-enable flatsplit
+```
+
+Then in Android's settings, exclude Termux from battery optimisation. Android
+kills background processes aggressively and this is the usual reason a
+self-hosted server "randomly stops".
+
+### Finding the phone's address
+
+```bash
+python -c "from config.lan import primary_lan_ip; print(primary_lan_ip())"
+```
+
+Everyone else on the WiFi opens `http://<that address>:8000`. Reserve the
+address on your router against the phone's MAC, or it will change on reboot
+and every home-screen icon in the flat will break.
+
+### Recurring bills and backups on Termux
+
+Cron is not installed by default:
+
+```bash
+pkg install cronie
+crond
+crontab -e
+```
+
+```cron
+0 6 * * * cd ~/flatsplit && .venv/bin/python manage.py generate_recurring >> cron.log 2>&1
+30 2 * * * cd ~/flatsplit && ./backup.sh >> backup.log 2>&1
+```
+
+To get backups somewhere you can reach from the phone's file manager:
+
+```bash
+termux-setup-storage
+./backup.sh ~/storage/downloads/flatsplit-backups
+```
+
+**Not verified on a device.** These steps follow Termux's documented
+behaviour, but this project has only been run on desktop Python. Expect to
+adjust the Pillow build and the service paths.
+
+---
+
 ## Backups
 
 ```bash
