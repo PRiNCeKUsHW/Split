@@ -16,6 +16,7 @@ const PRECACHE = [
   STATIC_PREFIX + "vendor/bootstrap.bundle.min.js",
   STATIC_PREFIX + "vendor/htmx.min.js",
   STATIC_PREFIX + "vendor/alpine.min.js",
+  STATIC_PREFIX + "fonts/grotesk-var.woff2",
   STATIC_PREFIX + "fonts/plex-mono-400.woff2",
   STATIC_PREFIX + "fonts/plex-mono-600.woff2",
   STATIC_PREFIX + "icons/icon-192.png",

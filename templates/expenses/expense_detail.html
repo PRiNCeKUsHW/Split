@@ -45,13 +45,13 @@
               {{ share.user.name }}
               {% if share.basis %}<span class="note d-block">{{ share.basis }}</span>{% endif %}
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="amount">&#8377;{{ share.amount_owed|floatformat:2 }}</span>
           </li>
         {% endfor %}
         <li class="fw-semibold">
           <span class="who">Total</span>
-          <span class="lead-dots"></span>
+          <span class="lead-dots" aria-hidden="true"></span>
           <span class="amount">&#8377;{{ expense.shares_total|floatformat:2 }}</span>
         </li>
       </ul>
@@ -83,7 +83,7 @@
                 <span class="note d-block">Changed: {{ entry.changed_fields|join:", " }}</span>
               {% endif %}
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="note">{{ entry.created_at|date:"j M, H:i" }}</span>
           </li>
         {% endfor %}
@@ -102,15 +102,4 @@
     </div>
   {% endif %}
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  // Confirm destructive posts without inline handlers in the markup.
-  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
-    form.addEventListener("submit", function (event) {
-      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
-    });
-  });
-</script>
 {% endblock %}

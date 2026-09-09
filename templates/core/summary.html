@@ -55,9 +55,11 @@
               paid &#8377;{{ row.paid|floatformat:2 }} &middot; share &#8377;{{ row.share|floatformat:2 }}
             </span>
           </span>
-          <span class="lead-dots"></span>
+          <span class="lead-dots" aria-hidden="true"></span>
           <span class="amount {% if row.diff > 0 %}credit{% elif row.diff < 0 %}debit{% endif %}">
-            {% if row.diff > 0 %}+{% endif %}&#8377;{{ row.diff|floatformat:2 }}
+            {% if row.diff > 0 %}+&#8377;{{ row.diff|floatformat:2 }}
+            {% elif row.diff < 0 %}&minus;&#8377;{{ row.diff|floatformat:2|cut:"-" }}
+            {% else %}&#8377;0.00{% endif %}
           </span>
         </li>
       {% endfor %}
@@ -82,14 +84,4 @@
     </form>
   </div>
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
-    form.addEventListener("submit", function (event) {
-      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
-    });
-  });
-</script>
 {% endblock %}

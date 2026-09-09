@@ -1,9 +1,9 @@
 {% load static %}<!doctype html>
-<html lang="en" data-bs-theme="auto">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#3a34c9">
+  <meta name="theme-color" content="#ffd43b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="FlatSplit">
   <title>{% block title %}FlatSplit{% endblock %}</title>
@@ -20,20 +20,22 @@
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
+  <a class="skip-link" href="#main">Skip to content</a>
+
   {% block topbar %}
     <header class="topbar">
       <a class="brand" href="{% url 'core:dashboard' %}">
-        <span class="mark">&#8377;</span> FlatSplit
+        <span class="brand-mark">&#8377;</span> FlatSplit
       </a>
       <div class="ms-auto d-flex align-items-center gap-2">
         {% block topbar_actions %}{% endblock %}
         <a class="avatar-chip" href="{% url 'accounts:profile' %}"
-           title="{{ user.name }} &middot; your profile">{{ user.initials }}</a>
+           aria-label="Your profile, {{ user.name }}">{{ user.initials }}</a>
       </div>
     </header>
   {% endblock %}
 
-  <main class="container px-3 py-3" style="max-width: 560px;">
+  <main class="container px-3 py-3" id="main" style="max-width: 560px;">
     {% include "partials/_messages.html" %}
     {% block content %}{% endblock %}
   </main>
@@ -42,6 +44,22 @@
 
   <script src="{% static 'vendor/bootstrap.bundle.min.js' %}" defer></script>
   <script>
+    // Confirm destructive posts without inline handlers in the markup.
+    // Delegated, so it also covers content HTMX swaps in later.
+    document.addEventListener("submit", function (event) {
+      var form = event.target.closest("form[data-confirm]");
+      if (form && !window.confirm(form.dataset.confirm)) event.preventDefault();
+    });
+
+    // Stop double-submits: a slow phone taps twice. HTMX marks the form
+    // .htmx-request while in flight; plain posts need this.
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (!form.matches || !form.matches("form") || form.hasAttribute("hx-post")) return;
+      var button = form.querySelector("button[type=submit]");
+      if (button) setTimeout(function () { button.disabled = true; }, 0);
+    });
+
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
         navigator.serviceWorker.register("/sw.js").catch(function (err) {

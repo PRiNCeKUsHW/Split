@@ -22,7 +22,7 @@
               {% if row.received %}&middot; got &#8377;{{ row.received|floatformat:2 }}{% endif %}
             </span>
           </span>
-          <span class="lead-dots"></span>
+          <span class="lead-dots" aria-hidden="true"></span>
           <span class="amount {% if row.is_owed %}credit{% elif row.owes %}debit{% endif %}">
             {% if row.is_owed %}+{% elif row.owes %}&minus;{% endif %}&#8377;{{ row.magnitude|floatformat:2 }}
           </span>
@@ -38,7 +38,7 @@
         {% for closure in closed_months %}
           <li>
             <span class="who">{{ closure }}</span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="note">{{ closure.closed_by.name }}, {{ closure.closed_at|date:"j M" }}</span>
           </li>
         {% endfor %}

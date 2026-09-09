@@ -23,7 +23,7 @@
                 {% if not template.is_active %}&middot; paused{% endif %}
               </span>
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="amount">
               {% if template.is_variable %}varies{% else %}&#8377;{{ template.amount|floatformat:2 }}{% endif %}
             </span>

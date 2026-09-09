@@ -42,7 +42,7 @@
       <span class="amount-symbol">&#8377;</span>
       {{ form.amount }}
     </div>
-    {% for error in form.amount.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+    {% for error in form.amount.errors %}<div class="text-danger small mb-2" role="alert">{{ error }}</div>{% endfor %}
     {% if suggested %}
       <p class="form-text small mb-3">
         Suggested from the settle-up plan: &#8377;{{ suggested|floatformat:2 }}

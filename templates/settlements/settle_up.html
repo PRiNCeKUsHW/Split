@@ -37,7 +37,7 @@
                 <span class="note d-block">Coming to you</span>
               {% endif %}
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="amount">&#8377;{{ transfer.amount|floatformat:2 }}</span>
             {% if transfer.i_pay %}
               <a class="badge-soft ms-2" href="{% url 'settlements:record' transfer.to_user.pk %}">Pay</a>
@@ -46,7 +46,7 @@
         {% endfor %}
       </ul>
       <p class="form-text small mb-0 mt-3">
-        {{ transfers|length }} payment{{ transfers|pluralize }} clears the whole flat.
+        {{ transfers|length }} payment{{ transfers|pluralize }} clear{{ transfers|length|pluralize:"s," }} the whole flat.
       </p>
     {% else %}
       <p class="empty mb-0">

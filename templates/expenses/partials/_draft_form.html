@@ -8,9 +8,9 @@
       <span class="amount-symbol">&#8377;</span>
       {{ draft_form.amount }}
     </div>
-    <button class="btn btn-primary" type="submit">Split it</button>
+    <button class="btn btn-primary" type="submit"><span class="htmx-idle">Split it</span><span class="htmx-busy">Wait&hellip;</span></button>
   </div>
   {% for error in draft_form.amount.errors %}
-    <div class="text-danger small mt-2">{{ error }}</div>
+    <div class="text-danger small mt-2" role="alert">{{ error }}</div>
   {% endfor %}
 </form>

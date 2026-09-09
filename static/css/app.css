@@ -1,14 +1,24 @@
 /* ==========================================================================
-   FlatSplit — a shared flat's ledger, on a phone.
+   FlatSplit — Neobrutalism
 
-   The whole app answers one question at a glance: am I up or down. So the
-   money pair (credit green / debit red) carries the emotional weight, one
-   indigo carries every action, and everything else stays quiet.
+   Hard black borders, hard offset shadows, flat saturated fills, no
+   gradients, no blur. Every coloured fill carries BLACK text, which is both
+   the authentic look and the reason the whole palette clears WCAG AA with
+   room to spare (9:1 to 14:1 on the fills).
 
-   Money is always monospace and right-aligned, because a ledger is a column
-   of aligned numbers and misaligned rupees are genuinely harder to scan.
+   The press interaction earns its keep: a pressed control slides into its
+   own shadow. That is the tap feedback the UX rules ask for, and it costs
+   nothing but a transform.
+
+   Money stays monospace and right-aligned — a ledger is a column of numbers.
    ========================================================================== */
 
+@font-face {
+  font-family: "Grotesk";
+  src: url("../fonts/grotesk-var.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
 @font-face {
   font-family: "Plex Mono";
   src: url("../fonts/plex-mono-400.woff2") format("woff2");
@@ -23,50 +33,108 @@
 }
 
 :root {
-  --ink: #14161c;
-  --paper: #faf9f6;
+  /* Ink and ground */
+  --ink: #0a0a0a;
+  --paper: #fff8e7;          /* warm cream, never pure white */
   --surface: #ffffff;
-  --line: #e4e1da;
-  --muted: #74716c;
-  --indigo: #3a34c9;
-  --indigo-soft: #eeedfb;
-  --credit: #0b7a4b;
-  --credit-soft: #e8f4ee;
-  --debit: #c42b4b;
-  --debit-soft: #fdecef;
+  --muted: #57544d;          /* 7.1:1 on cream, 7.6:1 on white */
 
-  --nav-h: 60px;
-  --radius: 14px;
+  /* Flat fills. Text on any of these is ALWAYS --ink. */
+  --marigold: #ffd43b;       /* primary action    13.9:1 with ink */
+  --mint: #7bf1a8;           /* you are owed      14.1:1 */
+  --blush: #ff8fa3;          /* you owe            9.2:1 */
+  --sky: #7dd3fc;            /* information       11.9:1 */
+  --lilac: #c4b5fd;
 
-  --mono: "Plex Mono", ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Semantic text colours, only ever on paper or surface */
+  --credit: #067647;         /* 5.7:1 on white */
+  --debit: #c1121f;          /* 6.2:1 on white */
 
-  /* Retheme Bootstrap through its own custom properties rather than
-     out-specifying its selectors. */
+  /* The three numbers that define the whole style */
+  --border-w: 3px;
+  --shadow-off: 4px;
+  --line: var(--ink);
+  --radius: 0px;
+
+  --shadow: var(--shadow-off) var(--shadow-off) 0 var(--ink);
+  --shadow-sm: 2px 2px 0 var(--ink);
+  --shadow-lg: 6px 6px 0 var(--ink);
+
+  --nav-h: 66px;
+
+  --display: "Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sans: "Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Plex Mono", ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace;
+
+  /* Retheme Bootstrap through its own properties rather than out-specifying it */
   --bs-body-bg: var(--paper);
   --bs-body-color: var(--ink);
   --bs-body-font-family: var(--sans);
-  --bs-primary: var(--indigo);
-  --bs-link-color: var(--indigo);
-  --bs-link-hover-color: var(--indigo);
-  --bs-border-color: var(--line);
-  --bs-border-radius: var(--radius);
+  --bs-border-color: var(--ink);
+  --bs-border-radius: 0;
+  --bs-link-color: var(--ink);
+  --bs-link-hover-color: var(--ink);
+  --bs-link-color-rgb: 10, 10, 10;
+  --bs-link-hover-color-rgb: 10, 10, 10;
+  --bs-secondary-color: var(--muted);
+  --bs-tertiary-color: var(--muted);
+  --bs-emphasis-color: var(--ink);
+  --bs-heading-color: var(--ink);
+  --bs-secondary-bg: var(--surface);
+  --bs-tertiary-bg: var(--surface);
 }
+
+/* Bootstrap computes these from rgba() on a light assumption, so they have to
+   be restated as opaque tokens or muted text goes gray-on-gray. */
+.text-body-secondary { color: var(--muted) !important; }
+.text-body-tertiary  { color: var(--muted) !important; }
+.text-reset          { color: var(--ink) !important; }
+
+/* .mark is a Bootstrap highlight utility — do not reuse the name. */
+.brand-mark { font-family: var(--mono); }
+
+/* Links are ink with a hard underline. Colour alone never marks a link. */
+a { color: var(--ink); text-underline-offset: 3px; text-decoration-thickness: 2px; }
+a:hover { color: var(--ink); }
+.section-title a { font-size: 0.75rem; font-weight: 700; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ink: #f2f0ec;
-    --paper: #121317;
-    --surface: #1b1d23;
-    --line: #2e313a;
-    --muted: #9a9691;
-    --indigo: #8b86ff;
-    --indigo-soft: #232248;
-    --credit: #4ade9b;
-    --credit-soft: #14291f;
-    --debit: #ff8098;
-    --debit-soft: #2c161c;
+    --ink: #f5f3ec;
+    --paper: #17171a;
+    --surface: #232327;
+    --muted: #a8a49b;        /* 7.2:1 on paper, 6.3:1 on surface */
+
+    /* Fills keep their black text — they are bright in both themes. */
+    --credit: #5ce896;       /* 10.0:1 on dark surface */
+    --debit: #ff9faf;        /*  8.1:1 on dark surface */
+
+    --line: var(--ink);
+    --shadow: var(--shadow-off) var(--shadow-off) 0 var(--ink);
+    --shadow-sm: 2px 2px 0 var(--ink);
+    --shadow-lg: 6px 6px 0 var(--ink);
+
+    --bs-secondary-color: var(--muted);
+    --bs-tertiary-color: var(--muted);
+    --bs-emphasis-color: var(--ink);
+    --bs-heading-color: var(--ink);
+    --bs-secondary-bg: var(--surface);
+    --bs-tertiary-bg: var(--surface);
+    --bs-link-color-rgb: 245, 243, 236;
+    --bs-link-hover-color-rgb: 245, 243, 236;
   }
+}
+
+/* Fills always pair with true black text, in both themes. */
+.on-fill,
+.balance-hero.is-credit,
+.balance-hero.is-debit,
+.btn-primary,
+.chip:has(input:checked),
+.month-pill.is-active,
+.badge-soft,
+.nav-add .fab {
+  color: #0a0a0a;
 }
 
 * { -webkit-tap-highlight-color: transparent; }
@@ -75,8 +143,26 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
-  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+  font-weight: 500;
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
   overscroll-behavior-y: contain;
+}
+
+h1, h2, h3, .h5 {
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Keyboard focus must survive the restyle. */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.chip:has(input:focus-visible),
+.tab:has(input:focus-visible),
+summary:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
 }
 
 /* --- Money ------------------------------------------------------------- */
@@ -85,119 +171,133 @@ body {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  letter-spacing: -0.01em;
   white-space: nowrap;
 }
 .money-hero {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  font-size: clamp(2.5rem, 13vw, 3.4rem);
-  letter-spacing: -0.045em;
-  line-height: 1;
+  font-size: clamp(2.5rem, 13vw, 3.5rem);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
 }
 .credit { color: var(--credit); }
 .debit  { color: var(--debit); }
+/* Inside a coloured hero the text is black, not the semantic colour. */
+.balance-hero.is-credit .credit,
+.balance-hero.is-debit .debit { color: #0a0a0a; }
 
-/* --- The balance hero: the top of the screen takes your position's colour */
+/* --- The balance hero: a solid block of your position -------------------- */
 
 .balance-hero {
-  padding: 1.75rem 1.25rem 1.5rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
+  padding: 1.5rem 1.25rem;
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow-lg);
   background: var(--surface);
-  position: relative;
-  overflow: hidden;
 }
-.balance-hero.is-credit { background: var(--credit-soft); border-color: transparent; }
-.balance-hero.is-debit  { background: var(--debit-soft);  border-color: transparent; }
+.balance-hero.is-credit  { background: var(--mint); }
+.balance-hero.is-debit   { background: var(--blush); }
 .balance-hero.is-settled { background: var(--surface); }
+.balance-hero.is-credit .eyebrow,
+.balance-hero.is-debit .eyebrow,
+.balance-hero.is-credit .text-body-secondary,
+.balance-hero.is-debit .text-body-secondary { color: #0a0a0a !important; }
 
 .eyebrow {
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 0.5rem;
 }
 
-/* --- Ledger rows: dotted leaders, the way a printed bill reads ---------- */
+/* --- Ledger rows -------------------------------------------------------- */
 
 .ledger { list-style: none; margin: 0; padding: 0; }
 .ledger li {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem;
-  padding: 0.7rem 0;
-  border-bottom: 1px solid var(--line);
+  padding: 0.75rem 0;
+  border-bottom: 2px solid var(--ink);
 }
 .ledger li:last-child { border-bottom: 0; }
 .ledger .lead-dots {
   flex: 1 1 auto;
-  border-bottom: 1px dotted var(--line);
-  transform: translateY(-0.25em);
+  border-bottom: 2px dotted var(--ink);
+  opacity: 0.35;
+  transform: translateY(-0.2em);
   min-width: 1.5rem;
 }
-.ledger .who { font-weight: 500; }
-.ledger .amount { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.ledger .note { color: var(--muted); font-size: 0.8125rem; }
+.ledger .who { font-weight: 700; }
+.ledger .amount {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.ledger .note { color: var(--muted); font-size: 0.8125rem; font-weight: 500; }
 
-/* --- Cards ------------------------------------------------------------- */
+/* --- Cards -------------------------------------------------------------- */
 
 .card-flat {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow);
   padding: 1rem 1.125rem;
 }
 .section-title {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--muted);
-  margin: 1.5rem 0 0.625rem;
+  font-family: var(--display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 1.75rem 0 0.75rem;
 }
 
-/* --- Top bar ----------------------------------------------------------- */
+/* --- Top bar ------------------------------------------------------------ */
 
 .topbar {
-  height: 52px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  padding: 0 1rem;
-  background: var(--paper);
-  border-bottom: 1px solid var(--line);
+  padding: 0.5rem 1rem;
+  background: var(--marigold);
+  color: #0a0a0a;
+  border-bottom: var(--border-w) solid var(--ink);
   position: sticky;
   top: 0;
   z-index: 20;
 }
 .topbar .brand {
-  font-family: var(--mono);
-  font-weight: 600;
+  font-family: var(--display);
+  font-weight: 700;
   letter-spacing: -0.03em;
-  color: var(--ink);
+  color: #0a0a0a;
   text-decoration: none;
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
+  text-transform: uppercase;
 }
-.topbar .brand .mark { color: var(--indigo); }
+.topbar .brand .brand-mark { font-family: var(--mono); }
 
 .avatar-chip {
-  width: 34px; height: 34px;
-  border-radius: 50%;
+  width: 40px; height: 40px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  color: var(--ink);
   display: grid; place-items: center;
-  background: var(--indigo-soft);
-  color: var(--indigo);
   font-family: var(--mono);
   font-size: 0.75rem;
   font-weight: 600;
   text-decoration: none;
   flex: none;
 }
+.topbar .avatar-chip { box-shadow: var(--shadow-sm); }
 
-/* --- Bottom nav -------------------------------------------------------- */
+/* --- Bottom nav --------------------------------------------------------- */
 
 .bottom-nav {
   position: fixed;
@@ -208,77 +308,164 @@ body {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   background: var(--surface);
-  border-top: 1px solid var(--line);
+  border-top: var(--border-w) solid var(--ink);
 }
 .bottom-nav a {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  min-height: 44px;
+  gap: 2px;
+  min-height: 48px;
   text-decoration: none;
   color: var(--muted);
+  font-family: var(--display);
   font-size: 0.625rem;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-right: 2px solid var(--ink);
 }
-.bottom-nav a.active { color: var(--indigo); }
+.bottom-nav a:last-child { border-right: 0; }
+.bottom-nav a.active { background: var(--marigold); color: #0a0a0a; }
 .bottom-nav a svg { width: 22px; height: 22px; }
+.bottom-nav a:active { background: var(--ink); color: var(--paper); }
+.bottom-nav a.active:active { background: var(--ink); color: var(--paper); }
 
-.nav-add { position: relative; }
+.nav-add { position: relative; overflow: visible; }
 .nav-add .fab {
   position: absolute;
-  top: -20px;
+  top: -22px;
   width: 56px; height: 56px;
-  border-radius: 50%;
-  background: var(--indigo);
-  color: #fff;
+  background: var(--marigold);
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow);
   display: grid; place-items: center;
-  box-shadow: 0 6px 18px rgba(58, 52, 201, 0.35);
-  border: 3px solid var(--paper);
+  transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
-.nav-add .fab svg { width: 26px; height: 26px; }
+.nav-add:active .fab {
+  transform: translate(var(--shadow-off), var(--shadow-off));
+  box-shadow: 0 0 0 var(--ink);
+}
+.nav-add .fab svg { width: 28px; height: 28px; }
 .nav-add span { margin-top: 34px; }
 
-/* --- Controls ---------------------------------------------------------- */
+/* --- Buttons: the press slides the block into its own shadow ------------ */
 
 .btn {
-  --bs-btn-border-radius: var(--radius);
-  font-weight: 500;
-}
-.btn-lg, .btn-primary {
+  --bs-btn-border-radius: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: var(--border-w) solid var(--ink) !important;
+  box-shadow: var(--shadow);
   min-height: 48px;
+  transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
+.btn:active:not(:disabled) {
+  transform: translate(var(--shadow-off), var(--shadow-off));
+  box-shadow: 0 0 0 var(--ink);
+}
+.btn:disabled, .btn.disabled {
+  box-shadow: none;
+  opacity: 0.55;
+  transform: none;
+  cursor: not-allowed;
+}
+
 .btn-primary {
-  --bs-btn-bg: var(--indigo);
-  --bs-btn-border-color: var(--indigo);
-  --bs-btn-hover-bg: var(--indigo);
-  --bs-btn-hover-border-color: var(--indigo);
-  --bs-btn-active-bg: var(--indigo);
-  --bs-btn-disabled-bg: var(--indigo);
-  --bs-btn-disabled-border-color: var(--indigo);
+  --bs-btn-bg: var(--marigold);
+  --bs-btn-color: #0a0a0a;
+  --bs-btn-hover-bg: var(--marigold);
+  --bs-btn-hover-color: #0a0a0a;
+  --bs-btn-active-bg: var(--marigold);
+  --bs-btn-active-color: #0a0a0a;
+  --bs-btn-disabled-bg: var(--marigold);
+  --bs-btn-disabled-color: #0a0a0a;
+  --bs-btn-border-color: var(--ink);
 }
+.btn-outline-secondary {
+  --bs-btn-bg: var(--surface);
+  --bs-btn-color: var(--ink);
+  --bs-btn-hover-bg: var(--sky);
+  --bs-btn-hover-color: #0a0a0a;
+  --bs-btn-active-bg: var(--sky);
+  --bs-btn-active-color: #0a0a0a;
+}
+.btn-outline-danger {
+  --bs-btn-bg: var(--surface);
+  --bs-btn-color: var(--debit);
+  --bs-btn-hover-bg: var(--blush);
+  --bs-btn-hover-color: #0a0a0a;
+  --bs-btn-active-bg: var(--blush);
+  --bs-btn-active-color: #0a0a0a;
+}
+.btn-link { box-shadow: none; border: 0 !important; min-height: 44px; }
+.btn-link:active { transform: none; }
+
+/* --- Form controls ------------------------------------------------------ */
+
 .form-control, .form-select {
   background: var(--surface);
-  border-color: var(--line);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 0;
   color: var(--ink);
-  border-radius: 10px;
+  font-family: var(--sans);
+  font-weight: 500;
+  min-height: 48px;
 }
 .form-control:focus, .form-select:focus {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--ink);
+  box-shadow: var(--shadow-sm);
   background: var(--surface);
   color: var(--ink);
 }
-.form-label { font-size: 0.8125rem; font-weight: 600; color: var(--muted); }
+.form-control::placeholder { color: var(--muted); opacity: 1; }
+.form-label {
+  font-family: var(--display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 0.35rem;
+}
+.form-text { color: var(--muted) !important; }
 
-/* Visible keyboard focus everywhere, not just on inputs. */
-a:focus-visible, button:focus-visible, .btn:focus-visible {
-  outline: 2px solid var(--indigo);
-  outline-offset: 2px;
+.form-check-input {
+  width: 1.5rem; height: 1.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background-color: var(--surface);
+}
+.form-check-input:checked {
+  background-color: var(--marigold);
+  border-color: var(--ink);
+}
+.form-check-input:focus {
+  border-color: var(--ink);
+  box-shadow: var(--shadow-sm);
 }
 
-/* --- Login ------------------------------------------------------------- */
+/* --- Alerts ------------------------------------------------------------- */
+
+.alert {
+  border: var(--border-w) solid var(--ink);
+  border-radius: 0;
+  box-shadow: var(--shadow-sm);
+  color: #0a0a0a;
+  font-weight: 600;
+}
+.alert-success { background: var(--mint); }
+.alert-info    { background: var(--sky); }
+.alert-warning { background: var(--marigold); }
+.alert-danger,
+.alert-error   { background: var(--blush); }   /* Django tags 'error', not 'danger' */
+.alert-secondary { background: var(--surface); color: var(--ink); }
+
+.text-danger { color: var(--debit) !important; font-weight: 600; }
+
+/* --- Login -------------------------------------------------------------- */
 
 .auth-wrap {
   min-height: 100svh;
@@ -290,98 +477,93 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
   margin: 0 auto;
 }
 .auth-mark {
-  font-family: var(--mono);
-  font-size: 1.75rem;
-  font-weight: 600;
-  letter-spacing: -0.05em;
-  margin-bottom: 0.25rem;
+  font-family: var(--display);
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 0.5rem;
 }
 
-/* --- Invite link ------------------------------------------------------- */
+/* --- Invite link -------------------------------------------------------- */
 
 .link-box {
   font-family: var(--mono);
   font-size: 0.8125rem;
   word-break: break-all;
-  background: var(--indigo-soft);
-  color: var(--ink);
-  border: 1px dashed var(--indigo);
-  border-radius: 10px;
+  background: var(--sky);
+  color: #0a0a0a;
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow-sm);
   padding: 0.75rem;
   line-height: 1.5;
 }
 
-/* --- Misc -------------------------------------------------------------- */
+/* --- Misc --------------------------------------------------------------- */
 
-.empty {
-  text-align: center;
-  padding: 2.5rem 1rem;
-  color: var(--muted);
-}
+.empty { text-align: center; padding: 2rem 1rem; color: var(--muted); font-weight: 600; }
+
 .badge-soft {
-  font-family: var(--mono);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0.3rem 0.7rem;
+  font-family: var(--display);
   font-size: 0.6875rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  background: var(--indigo-soft);
-  color: var(--indigo);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--marigold);
+  color: #0a0a0a;
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
-
-.htmx-request .htmx-hide { opacity: 0.45; transition: opacity 0.15s; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+.badge-soft:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+  color: #0a0a0a;
 }
 
 /* ==========================================================================
-   Screens added in phases 3-9
+   Screens
    ========================================================================== */
 
-/* --- The amount field: the first thing on the add screen ---------------- */
+/* --- The amount field: first thing on the add screen -------------------- */
 
 .amount-field {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  background: var(--marigold);
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow);
+  padding: 0.85rem 1rem;
   font-size: 2.25rem;
+  color: #0a0a0a;
 }
-.amount-field:focus-within {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
-}
-.amount-symbol {
-  font-family: var(--mono);
-  color: var(--muted);
-  font-size: 0.7em;
-}
+.amount-field:focus-within { box-shadow: var(--shadow-lg); }
+.amount-symbol { font-family: var(--mono); font-size: 0.7em; font-weight: 600; }
 .amount-input,
 .amount-input.form-control {
   border: 0;
+  min-height: 0;
   background: transparent;
   padding: 0;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   font-size: 1em;
-  letter-spacing: -0.04em;
-  color: var(--ink);
+  letter-spacing: -0.045em;
+  color: #0a0a0a;
   width: 100%;
   height: auto;
 }
-.amount-input:focus {
-  outline: none;
-  box-shadow: none;
-  background: transparent;
-}
-/* Kill the spinner: nobody nudges a rupee total up by one. */
+.amount-input:focus { outline: none; box-shadow: none; background: transparent; }
+.amount-input::placeholder { color: rgba(10, 10, 10, 0.45); }
 .amount-input::-webkit-outer-spin-button,
 .amount-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .amount-input { -moz-appearance: textfield; appearance: textfield; }
@@ -393,62 +575,61 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
   position: relative;
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0.4rem 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-sm);
   background: var(--surface);
-  font-size: 0.875rem;
+  font-family: var(--display);
+  font-size: 0.8125rem;
+  font-weight: 700;
   cursor: pointer;
   user-select: none;
+  transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
 .chip input { position: absolute; opacity: 0; pointer-events: none; }
-.chip:has(input:checked) {
-  background: var(--indigo);
-  border-color: var(--indigo);
-  color: #fff;
-}
-.chip:has(input:focus-visible) { outline: 2px solid var(--indigo); outline-offset: 2px; }
+.chip:has(input:checked) { background: var(--marigold); }
+.chip:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
 
 /* --- Split-type tabs ---------------------------------------------------- */
 
 .tab-row {
   display: flex;
-  gap: 4px;
-  background: var(--indigo-soft);
-  padding: 4px;
-  border-radius: 12px;
+  gap: 0;
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
 }
 .tab {
   flex: 1;
   position: relative;
   text-align: center;
-  padding: 0.55rem 0.25rem;
-  border-radius: 9px;
-  font-size: 0.8125rem;
+  padding: 0.6rem 0.25rem;
+  font-family: var(--display);
+  font-size: 0.75rem;
+  font-weight: 700;
   cursor: pointer;
   color: var(--muted);
-  min-height: 44px;
+  min-height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-right: 2px solid var(--ink);
 }
+.tab:last-child { border-right: 0; }
 .tab input { position: absolute; opacity: 0; pointer-events: none; }
-.tab:has(input:checked),
-.tab.is-active {
-  background: var(--surface);
-  color: var(--ink);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
+.tab:has(input:checked), .tab.is-active { background: var(--marigold); color: #0a0a0a; }
+.tab:active { background: var(--ink); color: var(--paper); }
 
-/* Per-person split inputs sit at a fixed width so the column stays straight. */
 .split-input { flex: none; width: 96px; }
 .split-input .form-control {
   text-align: right;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
   padding: 0.25rem 0.5rem;
+  min-height: 44px;
+  border-width: 2px;
 }
 [x-cloak] { display: none !important; }
 
@@ -456,54 +637,53 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
 
 .month-scroll {
   display: flex;
-  gap: 0.375rem;
+  gap: 0.5rem;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding: 2px 2px 6px;
   scrollbar-width: none;
 }
 .month-scroll::-webkit-scrollbar { display: none; }
 .month-pill {
   flex: none;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-sm);
   background: var(--surface);
-  color: var(--muted);
-  font-size: 0.8125rem;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 0.75rem;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
-  min-height: 36px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
+  transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
-.month-pill.is-active {
-  background: var(--indigo);
-  border-color: var(--indigo);
-  color: #fff;
-}
+.month-pill.is-active { background: var(--marigold); }
+.month-pill:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
 
 /* --- Category dot ------------------------------------------------------- */
 
 .cat-dot {
   flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-top: 0.45em;
-  align-self: flex-start;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  align-self: center;
 }
 
-/* --- Summary bars (no chart library: it must work offline) -------------- */
+/* --- Summary bars ------------------------------------------------------- */
 
-.bar-row { padding: 0.55rem 0; border-bottom: 1px solid var(--line); }
+.bar-row { padding: 0.6rem 0; border-bottom: 2px solid var(--ink); }
 .bar-row:last-child { border-bottom: 0; }
 .bar-track {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--indigo-soft);
+  height: 16px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
   overflow: hidden;
 }
-.bar-fill { height: 100%; border-radius: 3px; min-width: 2px; }
+.bar-fill { height: 100%; min-width: 3px; border-right: 2px solid var(--ink); }
 
 /* --- Settlements -------------------------------------------------------- */
 
@@ -511,26 +691,81 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
   width: 200px;
   max-width: 60vw;
   height: auto;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow);
   background: #fff;
   padding: 8px;
 }
-.pending-row { padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+.pending-row { padding: 0.85rem 0; border-bottom: 2px solid var(--ink); }
 .pending-row:last-child { padding-bottom: 0; border-bottom: 0; }
 
 .receipt-image {
   width: 100%;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
+  border: var(--border-w) solid var(--ink);
+  box-shadow: var(--shadow);
 }
 
-/* --- Radio / checkbox sizing for thumbs --------------------------------- */
-
-.form-check-input { width: 1.25rem; height: 1.25rem; }
-.form-check-input:checked { background-color: var(--indigo); border-color: var(--indigo); }
+/* --- Details / disclosure ----------------------------------------------- */
 
 details summary::-webkit-details-marker { display: none; }
-details summary { list-style: none; }
-details summary::before { content: "+ "; }
+details summary {
+  list-style: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+details summary::before { content: "+ "; margin-right: 0.35rem; }
 details[open] summary::before { content: "− "; }
+
+/* --- HTMX in-flight feedback -------------------------------------------- */
+
+.htmx-request .htmx-idle { display: none; }
+.htmx-busy { display: none; }
+.htmx-request .htmx-busy { display: inline; }
+.htmx-request .btn { opacity: 0.7; pointer-events: none; }
+
+/* Native pickers draw a dark glyph that disappears on a dark surface. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+}
+/* On the marigold amount block the glyph must stay dark in both themes. */
+.amount-field input::-webkit-calendar-picker-indicator { filter: none; }
+
+/* --- Skip link ---------------------------------------------------------- */
+
+.skip-link {
+  /* Never move it off-canvas with a negative offset: that widens the
+     document and pushes every centred container sideways. Clip instead. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  z-index: 100;
+  background: var(--marigold);
+  color: #0a0a0a;
+  border: var(--border-w) solid var(--ink);
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip-link:focus {
+  position: fixed;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

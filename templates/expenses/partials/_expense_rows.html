@@ -11,7 +11,7 @@
         {% if expense.is_draft %}<span class="badge-soft ms-1">needs amount</span>{% endif %}
       </span>
     </span>
-    <span class="lead-dots"></span>
+    <span class="lead-dots" aria-hidden="true"></span>
     <span class="amount">
       {% if expense.amount %}&#8377;{{ expense.amount|floatformat:2 }}{% else %}&mdash;{% endif %}
     </span>

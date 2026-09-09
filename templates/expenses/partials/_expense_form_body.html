@@ -13,11 +13,11 @@
     <span class="amount-symbol">&#8377;</span>
     {{ form.amount }}
   </div>
-  {% for error in form.amount.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+  {% for error in form.amount.errors %}<div class="text-danger small mb-2" role="alert">{{ error }}</div>{% endfor %}
 
   <div class="mb-3">
     {{ form.description }}
-    {% for error in form.description.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+    {% for error in form.description.errors %}<div class="text-danger small mt-1" role="alert">{{ error }}</div>{% endfor %}
   </div>
 
   <p class="eyebrow mb-2">Category</p>
@@ -29,7 +29,7 @@
       </label>
     {% endfor %}
   </div>
-  {% for error in form.category.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+  {% for error in form.category.errors %}<div class="text-danger small mb-2" role="alert">{{ error }}</div>{% endfor %}
 
   <div class="row g-2 mb-3">
     <div class="col-7">
@@ -41,7 +41,7 @@
       {{ form.date }}
     </div>
   </div>
-  {% for error in form.date.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+  {% for error in form.date.errors %}<div class="text-danger small mb-2" role="alert">{{ error }}</div>{% endfor %}
 
   <p class="eyebrow mb-2">Split</p>
   <div class="tab-row mb-3">
@@ -74,7 +74,7 @@
         </li>
       {% endfor %}
     </ul>
-    {% for error in form.participants.errors %}<div class="text-danger small mt-2">{{ error }}</div>{% endfor %}
+    {% for error in form.participants.errors %}<div class="text-danger small mt-2" role="alert">{{ error }}</div>{% endfor %}
   </div>
 
   {# Live preview, so away-day proration is visible before you commit to it. #}
@@ -85,7 +85,7 @@
        hx-target="#split-preview"
        hx-swap="outerHTML">
     <p class="eyebrow mb-2">Each person pays</p>
-    <div id="split-preview">
+    <div id="split-preview" aria-live="polite">
       <p class="text-body-secondary small mb-0">Enter an amount to see the split.</p>
     </div>
   </div>
@@ -107,7 +107,7 @@
         Set a period for a bill that covers several days &mdash; groceries, gas,
         the maid. Away days are then counted across that window.
       </p>
-      {% for error in form.period_end.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+      {% for error in form.period_end.errors %}<div class="text-danger small mb-2" role="alert">{{ error }}</div>{% endfor %}
 
       <label class="form-label" for="{{ form.notes.id_for_label }}">Notes</label>
       {{ form.notes }}
@@ -118,7 +118,8 @@
   </details>
 
   <button type="submit" class="btn btn-primary btn-lg w-100">
-    {% if is_edit %}Save changes{% else %}Add expense{% endif %}
+    <span class="htmx-idle">{% if is_edit %}Save changes{% else %}Add expense{% endif %}</span>
+    <span class="htmx-busy">Saving&hellip;</span>
   </button>
 
   {% if is_edit %}

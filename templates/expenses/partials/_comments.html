@@ -18,5 +18,5 @@
       hx-swap="innerHTML">
   {% csrf_token %}
   {{ comment_form.body }}
-  <button class="btn btn-outline-secondary btn-sm mt-2" type="submit">Post comment</button>
+  <button class="btn btn-outline-secondary btn-sm mt-2" type="submit"><span class="htmx-idle">Post comment</span><span class="htmx-busy">Posting&hellip;</span></button>
 </form>

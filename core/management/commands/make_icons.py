@@ -11,8 +11,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from PIL import Image, ImageDraw, ImageFont
 
-INDIGO = (58, 52, 201, 255)
-PAPER = (250, 249, 246, 255)
+MARIGOLD = (255, 212, 59, 255)
+INK = (10, 10, 10, 255)
 
 
 def _rupee_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -36,15 +36,18 @@ def _draw_icon(size: int, *, maskable: bool) -> Image.Image:
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
+    stroke = max(2, int(size * 0.055))
+
     if maskable:
         # Maskable icons get cropped to a circle by the launcher, so the
         # background must bleed to the edges and the glyph stay in the
         # middle 80%.
-        draw.rectangle([0, 0, size, size], fill=INDIGO)
+        draw.rectangle([0, 0, size, size], fill=MARIGOLD)
         glyph_size = int(size * 0.44)
     else:
-        radius = int(size * 0.22)
-        draw.rounded_rectangle([0, 0, size - 1, size - 1], radius=radius, fill=INDIGO)
+        # Neobrutalism: flat fill, hard black border, no rounding.
+        draw.rectangle([0, 0, size - 1, size - 1], fill=MARIGOLD,
+                       outline=INK, width=stroke)
         glyph_size = int(size * 0.58)
 
     font = _rupee_font(glyph_size)
@@ -54,7 +57,7 @@ def _draw_icon(size: int, *, maskable: bool) -> Image.Image:
         ((size - (box[2] - box[0])) / 2 - box[0], (size - (box[3] - box[1])) / 2 - box[1]),
         glyph,
         font=font,
-        fill=PAPER,
+        fill=INK,
     )
     return img
 

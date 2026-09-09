@@ -122,5 +122,9 @@ CSRF_COOKIE_SECURE = False
 
 MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
+# Bump on any static-asset change: it names the service-worker cache,
+# so phones drop the old CSS instead of holding a stale stylesheet.
+APP_VERSION = "2"
+
 # Money is Decimal everywhere. Kept here so templates and services agree.
 CURRENCY_SYMBOL = "₹"

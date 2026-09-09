@@ -30,8 +30,8 @@
       </div>
     </div>
     <p class="form-text small mb-3">Both days count. 5th to 8th is four days.</p>
-    {% for error in form.end_date.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
-    {% for error in form.start_date.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+    {% for error in form.end_date.errors %}<div class="text-danger small mb-2" role="alert">{{ error }}</div>{% endfor %}
+    {% for error in form.start_date.errors %}<div class="text-danger small mb-2" role="alert">{{ error }}</div>{% endfor %}
 
     <div class="mb-3">
       <label class="form-label" for="{{ form.reason.id_for_label }}">Reason (optional)</label>
@@ -55,12 +55,13 @@
                 {% if period.reason %}&middot; {{ period.reason }}{% endif %}
               </span>
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="amount">{{ period.days }}d</span>
             {% if period.user_id == user.pk or user.is_staff %}
-              <form method="post" action="{% url 'accounts:away_delete' period.pk %}" class="ms-2">
+              <form method="post" action="{% url 'accounts:away_delete' period.pk %}" class="ms-2"
+                    data-confirm="Remove these away days? Splits already made keep their numbers.">
                 {% csrf_token %}
-                <button class="btn btn-link btn-sm p-0 text-danger" type="submit">Remove</button>
+                <button class="badge-soft" type="submit" style="background: var(--blush)">Remove</button>
               </form>
             {% endif %}
           </li>

@@ -4,6 +4,9 @@
 
 {% block content %}
 
+  {# Visible label would duplicate the hero, so the h1 is for assistive tech. #}
+  <h1 class="visually-hidden">Your FlatSplit balance</h1>
+
   {# The one question this app exists to answer, in the first line. #}
   <section class="balance-hero {% if balance.is_owed %}is-credit{% elif balance.owes %}is-debit{% else %}is-settled{% endif %}"
            aria-labelledby="balance-heading">
@@ -25,7 +28,7 @@
   </section>
 
   {% if pending %}
-    <div class="card-flat mt-3 border-warning-subtle">
+    <div class="card-flat mt-3">
       <p class="eyebrow mb-2">Waiting for you to confirm</p>
       {% for settlement in pending %}
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -49,7 +52,7 @@
               {{ draft.description }}
               <span class="note d-block">{{ draft.date|date:"j M" }} &middot; {{ draft.category.name }}</span>
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <a class="badge-soft" href="{% url 'expenses:detail' draft.pk %}">Fill in</a>
           </li>
         {% endfor %}
@@ -71,7 +74,7 @@
                 </span>
               {% endif %}
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="amount">&#8377;{{ transfer.amount|floatformat:2 }}</span>
             {% if transfer.i_pay %}
               <a class="badge-soft ms-2" href="{% url 'settlements:record' transfer.to_user.pk %}">Pay</a>
@@ -89,12 +92,12 @@
     <ul class="ledger mb-0">
       <li>
         <span class="who">Flat total</span>
-        <span class="lead-dots"></span>
+        <span class="lead-dots" aria-hidden="true"></span>
         <span class="amount">&#8377;{{ month_total|floatformat:2 }}</span>
       </li>
       <li>
         <span class="who">Your share</span>
-        <span class="lead-dots"></span>
+        <span class="lead-dots" aria-hidden="true"></span>
         <span class="amount">&#8377;{{ my_month_share|floatformat:2 }}</span>
       </li>
     </ul>
@@ -117,7 +120,7 @@
                 {{ expense.date|date:"j M" }} &middot; {{ expense.paid_by.name }} paid
               </span>
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="amount">
               {% if expense.amount %}&#8377;{{ expense.amount|floatformat:2 }}{% else %}&mdash;{% endif %}
             </span>

@@ -22,6 +22,7 @@ VENDORED = (
     "vendor/bootstrap.bundle.min.js",
     "vendor/htmx.min.js",
     "vendor/alpine.min.js",
+    "fonts/grotesk-var.woff2",
     "fonts/plex-mono-400.woff2",
     "fonts/plex-mono-600.woff2",
 )
@@ -65,7 +66,7 @@ def test_bootstrap_is_really_bootstrap():
 
 
 def test_fonts_are_real_woff2_files():
-    for name in ("plex-mono-400.woff2", "plex-mono-600.woff2"):
+    for name in ("grotesk-var.woff2", "plex-mono-400.woff2", "plex-mono-600.woff2"):
         head = (Path(settings.BASE_DIR) / "static" / "fonts" / name).read_bytes()[:4]
         assert head == b"wOF2", f"{name} is not a woff2 file"
 

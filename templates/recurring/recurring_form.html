@@ -16,7 +16,7 @@
         <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
         {% if field.help_text %}<div class="form-text small">{{ field.help_text }}</div>{% endif %}
-        {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        {% for error in field.errors %}<div class="text-danger small mt-1" role="alert">{{ error }}</div>{% endfor %}
       </div>
     {% endfor %}
 
@@ -30,14 +30,4 @@
       <button class="btn btn-outline-danger w-100" type="submit">Delete template</button>
     </form>
   {% endif %}
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
-    form.addEventListener("submit", function (event) {
-      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
-    });
-  });
-</script>
 {% endblock %}

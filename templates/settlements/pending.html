@@ -60,7 +60,7 @@
               {{ settlement.to_user.name }}
               <span class="note d-block">Sent {{ settlement.date|date:"j M" }} &middot; not confirmed yet</span>
             </span>
-            <span class="lead-dots"></span>
+            <span class="lead-dots" aria-hidden="true"></span>
             <span class="amount">&#8377;{{ settlement.amount|floatformat:2 }}</span>
           </li>
         {% endfor %}
