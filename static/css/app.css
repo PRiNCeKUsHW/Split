@@ -366,11 +366,18 @@ summary:focus-visible {
 .nav-add .fab {
   position: absolute;
   top: -22px;
-  width: 56px; height: 56px;
+  /* Centred with a negative margin rather than translateX, because the
+     press state below needs `transform` to itself. Half of 56px, and
+     box-sizing: border-box means the 3px border is already inside that. */
+  left: 50%;
+  margin-left: -28px;
+  width: 56px;
+  height: 56px;
   background: var(--action);
   border: var(--border-w) solid var(--ink);
   box-shadow: var(--shadow);
-  display: grid; place-items: center;
+  display: grid;
+  place-items: center;
   transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
 .nav-add:active .fab {
@@ -378,7 +385,10 @@ summary:focus-visible {
   box-shadow: 0 0 0 var(--ink);
 }
 .nav-add .fab svg { width: 28px; height: 28px; }
-.nav-add span { margin-top: 34px; }
+
+/* The fab is a <span> too, so this must exclude it -- otherwise the fab
+   gets margin-top on top of its own `top` and sinks into the bar. */
+.nav-add > span:not(.fab) { margin-top: 34px; }
 
 /* --- Buttons: the press slides the block into its own shadow ------------ */
 

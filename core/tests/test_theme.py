@@ -25,23 +25,34 @@ STANDALONE_TEMPLATES = [
 
 
 def _css() -> str:
-    return CSS.read_text(encoding="utf-8")
+    """app.css with /* comments */ removed.
+
+    Structural assertions must not trip over prose: a comment explaining why
+    translateX was avoided still contains the word "translateX".
+    """
+    return re.sub(r"/\*.*?\*/", "", CSS.read_text(encoding="utf-8"), flags=re.S)
+
+
+def _blocks(selector: str) -> list[str]:
+    """Bodies of every rule using this selector. A selector may appear more
+    than once -- .nav-add .fab has both a colour rule and a layout rule."""
+    text, bodies, cursor = _css(), [], 0
+    while True:
+        index = text.find(selector, cursor)
+        if index == -1:
+            return bodies
+        start = text.index("{", index) + 1
+        depth, scan = 1, start
+        while depth:
+            depth += {"{": 1, "}": -1}.get(text[scan], 0)
+            scan += 1
+        bodies.append(text[start : scan - 1])
+        cursor = scan
 
 
 def _block(selector: str) -> str:
-    """Return the body of the first rule whose selector matches exactly."""
-    text = _css()
-    index = text.index(selector)
-    start = text.index("{", index) + 1
-    depth, cursor = 1, start
-    while depth:
-        char = text[cursor]
-        if char == "{":
-            depth += 1
-        elif char == "}":
-            depth -= 1
-        cursor += 1
-    return text[start : cursor - 1]
+    """The first rule body for this selector."""
+    return _blocks(selector)[0]
 
 
 def _tokens(block: str) -> dict[str, str]:
@@ -187,3 +198,41 @@ def test_the_toggle_is_a_real_button_not_a_bare_div(client, django_user_model):
     index = body.index("data-theme-toggle")
 
     assert body.rfind("<button", 0, index) > body.rfind("<div", 0, index)
+
+
+# ------------------------------------------------------------- bottom nav
+
+
+def _fab_layout() -> str:
+    """The .nav-add .fab rule that actually positions it."""
+    for body in _blocks(".nav-add .fab {"):
+        if "position: absolute" in body:
+            return body
+    raise AssertionError("no .nav-add .fab rule positions the button")
+
+
+def test_the_add_button_is_explicitly_centred():
+    """position:absolute with no `left` falls back to the static position,
+    which inside a flex container is not reliably centred."""
+    block = _fab_layout()
+
+    assert "left: 50%" in block, "the raised add button has no horizontal anchor"
+    assert "margin-left: -28px" in block, "half its own width, to centre it"
+
+
+def test_the_add_button_sits_above_the_bar():
+    assert "top: -22px" in _fab_layout()
+
+
+def test_the_add_button_keeps_transform_for_its_press_state():
+    """Centring with translateX would be overwritten by the press animation."""
+    assert "translateX" not in _fab_layout()
+    assert "transform: translate(" in _block(".nav-add:active .fab")
+
+
+def test_the_nav_label_rule_excludes_the_fab():
+    """The fab is a <span>; a bare `.nav-add span` rule sinks it into the bar."""
+    css = _css()
+
+    assert ".nav-add > span:not(.fab)" in css
+    assert "\n.nav-add span {" not in css, "bare span rule still matches the fab"
