@@ -1,5 +1,7 @@
 *.log
 *.py[cod]
+*.sqlite3
+*.sqlite3-*
 .coverage
 .env
 .pytest_cache/
