@@ -65,6 +65,18 @@ Four flatmates, a month of realistic bills, two trips away, a mid-month
 move-in, and settlements in every state. Log in as `anuj`, `priya`, `rohit` or
 `meera`, password `flatsplit`. **Change those before anyone real uses it.**
 
+When you are done looking around, throw it all away:
+
+```bash
+python manage.py seed_demo --clear     # remove the demo data, keep the app
+python manage.py seed_demo --reset     # remove it and seed a fresh month
+```
+
+`--clear` deletes every demo flatmate, expense, settlement, away period,
+recurring template and audit entry. It keeps the eight categories, which come
+from a migration rather than the demo. It also removes the demo superuser, so
+run `createsuperuser` afterwards before you try to log in.
+
 ---
 
 ## Running it

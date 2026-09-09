@@ -5,7 +5,8 @@ a couple of trips away, some settlements in every state, and the recurring
 templates that generated the fixed bills.
 
     python manage.py seed_demo          # add to whatever is there
-    python manage.py seed_demo --reset  # wipe the demo data first
+    python manage.py seed_demo --reset  # wipe the demo data, then re-seed
+    python manage.py seed_demo --clear  # wipe the demo data and stop
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from accounts.models import AwayPeriod
+from core.models import AuditLog, MonthClose
 from expenses.models import Category, Comment, Expense
 from expenses.services.presence import weights_for
 from expenses.services.shares import rebuild_shares
@@ -62,6 +64,11 @@ class Command(BaseCommand):
             "--reset", action="store_true", help="Delete existing demo data first."
         )
         parser.add_argument(
+            "--clear",
+            action="store_true",
+            help="Delete the demo data and stop. Leaves an empty, usable flat.",
+        )
+        parser.add_argument(
             "--month", type=str, default="", help="YYYY-MM. Defaults to this month."
         )
 
@@ -74,6 +81,24 @@ class Command(BaseCommand):
         else:
             today = dt.date.today()
             year, month = today.year, today.month
+
+        if options["clear"]:
+            self._reset()
+            self.stdout.write("")
+            self.stdout.write(self.style.SUCCESS("Demo data removed."))
+            self.stdout.write(
+                f"  {Category.objects.count()} categories kept — they ship with the "
+                "app, not with the demo."
+            )
+            if not User.objects.filter(is_superuser=True).exists():
+                self.stdout.write("")
+                self.stdout.write(
+                    self.style.WARNING(
+                        "  No superuser left. Create one before you can log in:\n"
+                        "    python manage.py createsuperuser"
+                    )
+                )
+            return
 
         if options["reset"]:
             self._reset()
@@ -100,13 +125,30 @@ class Command(BaseCommand):
     # -- pieces ------------------------------------------------------------
 
     def _reset(self) -> None:
-        Comment.objects.all().delete()
-        Settlement.objects.all().delete()
-        Expense.objects.all().delete()
-        RecurringExpense.objects.all().delete()
-        AwayPeriod.objects.all().delete()
-        User.objects.filter(username__in=[u for u, *_ in FLATMATES]).delete()
-        self.stdout.write("Cleared the old demo data.")
+        """Remove everything the demo created, in dependency order.
+
+        Categories survive: they come from a migration, not from here.
+        MonthClose has to go before the users do, because closed_by is
+        PROTECT and would otherwise block the delete.
+        """
+        # delete() returns (total_including_cascades, {label: count}). Report
+        # the per-model breakdown, or deleting 18 expenses reads as 81.
+        removed: dict[str, int] = {}
+        for queryset in (
+            Comment.objects.all(),
+            Settlement.objects.all(),
+            Expense.objects.all(),
+            RecurringExpense.objects.all(),
+            AwayPeriod.objects.all(),
+            MonthClose.objects.all(),
+            AuditLog.objects.all(),
+            User.objects.filter(username__in=[u for u, *_ in FLATMATES]),
+        ):
+            for label, count in queryset.delete()[1].items():
+                removed[label] = removed.get(label, 0) + count
+
+        for label in sorted(removed):
+            self.stdout.write(f"  removed {removed[label]} {label.split('.')[-1]}")
 
     def _make_flatmates(self, year: int, month: int) -> list:
         people = []
