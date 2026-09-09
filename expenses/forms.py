@@ -270,3 +270,83 @@ class ExpenseFilterForm(forms.Form):
         everyone = User.objects.all()
         self.fields["paid_by"].queryset = everyone
         self.fields["involving"].queryset = everyone
+
+
+class CategoryForm(forms.ModelForm):
+    """Create or edit a category.
+
+    The two proration flags are set through one three-way choice rather than
+    two checkboxes. That makes the invalid combination -- away-day proration
+    without tenancy proration -- unreachable from the UI, instead of merely
+    rejected after the fact.
+    """
+
+    BEHAVIOURS = [
+        ("EVEN", "Split evenly, always"),
+        ("TENANCY", "By days lived here"),
+        ("PRESENCE", "By days actually present"),
+    ]
+    BEHAVIOUR_FLAGS = {
+        # behaviour: (prorate_by_tenancy, prorate_by_presence)
+        "EVEN": (False, False),
+        "TENANCY": (True, False),
+        "PRESENCE": (True, True),
+    }
+    BEHAVIOUR_HELP = {
+        "EVEN": "One-off buys, shared gifts. Everyone chosen pays the same.",
+        "TENANCY": "Rent, WiFi, maintenance. A holiday does NOT reduce your share.",
+        "PRESENCE": "Food, gas, the maid. Being away DOES reduce your share.",
+    }
+
+    # Restricted to the palette so a new category cannot break the design.
+    COLOURS = [
+        ("#a78bfa", "Violet"),
+        ("#bef264", "Lime"),
+        ("#fb7185", "Rose"),
+        ("#67e8f9", "Cyan"),
+        ("#fdba74", "Amber"),
+        ("#f0abfc", "Fuchsia"),
+        ("#a3a3a3", "Grey"),
+    ]
+
+    behaviour = forms.ChoiceField(
+        choices=BEHAVIOURS,
+        widget=forms.RadioSelect,
+        label="How should this be split?",
+    )
+    color = forms.ChoiceField(choices=COLOURS, widget=forms.RadioSelect, label="Colour")
+
+    class Meta:
+        model = Category
+        fields = ["name", "color", "icon"]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "form-control form-control-lg", "placeholder": "Milk delivery"}
+            ),
+            "icon": forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["icon"].required = False
+        if self.instance.pk:
+            self.fields["behaviour"].initial = self.instance.behaviour
+            self.initial["behaviour"] = self.instance.behaviour
+        else:
+            self.fields["behaviour"].initial = "EVEN"
+            self.initial.setdefault("behaviour", "EVEN")
+            self.initial.setdefault("color", self.COLOURS[0][0])
+
+    def behaviour_rows(self):
+        """Pair each radio with its explanation, for the template."""
+        for choice in self["behaviour"]:
+            yield {"choice": choice, "help": self.BEHAVIOUR_HELP[choice.data["value"]]}
+
+    def save(self, commit=True):
+        category = super().save(commit=False)
+        tenancy, presence = self.BEHAVIOUR_FLAGS[self.cleaned_data["behaviour"]]
+        category.prorate_by_tenancy = tenancy
+        category.prorate_by_presence = presence
+        if commit:
+            category.save()
+        return category

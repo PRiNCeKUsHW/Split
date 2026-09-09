@@ -45,11 +45,82 @@ def test_session_lasts_thirty_days_after_login(client, settings):
     assert client.session.get_expiry_age() > 60 * 60 * 24 * 29
 
 
-def test_only_staff_can_invite(client):
+def test_any_flatmate_can_invite(client):
+    """Changed deliberately: gatekeeping who adds the new housemate is
+    friction with no benefit when everyone already sees all the money."""
     User.objects.create_user(username="plain", password="x")
     client.login(username="plain", password="x")
 
-    assert client.get(reverse("accounts:invite")).status_code == 403
+    assert client.get(reverse("accounts:invite")).status_code == 200
+
+
+def test_a_plain_flatmate_can_actually_create_one(client):
+    User.objects.create_user(username="plain", password="x")
+    client.login(username="plain", password="x")
+
+    response = client.post(
+        reverse("accounts:invite"),
+        {"username": "newbie", "display_name": "New Bie", "phone": "", "upi_id": ""},
+    )
+
+    assert response.status_code == 200
+    assert User.objects.filter(username="newbie").exists()
+
+
+def test_editing_someone_else_is_still_admin_only(client):
+    """Adding a flatmate opened up; changing their tenancy dates did not."""
+    User.objects.create_user(username="plain", password="x")
+    other = User.objects.create_user(username="other", password="x")
+    client.login(username="plain", password="x")
+
+    assert client.get(reverse("accounts:member_edit", args=[other.pk])).status_code == 403
+
+
+def test_the_members_list_offers_a_share_link_for_an_unused_invite(client):
+    """A lost invite link must be recoverable without starting over."""
+    User.objects.create_user(username="anuj", password="x")
+    invited = create_flatmate(username="newbie", display_name="New Bie")
+    client.login(username="anuj", password="x")
+
+    body = client.get(reverse("accounts:members")).content.decode()
+
+    assert f"/accounts/members/{invited.pk}/link/" in body
+
+
+def test_the_share_link_page_regenerates_a_working_link(client):
+    from django.contrib.auth.tokens import default_token_generator
+
+    User.objects.create_user(username="anuj", password="x")
+    invited = create_flatmate(username="newbie", display_name="New Bie")
+    client.login(username="anuj", password="x")
+
+    response = client.get(reverse("accounts:member_link", args=[invited.pk]))
+    body = response.content.decode()
+
+    assert response.status_code == 200
+    assert "/accounts/set-password/" in body
+    token = body.split("/accounts/set-password/")[1].split("/")[1]
+    assert default_token_generator.check_token(invited, token)
+
+
+def test_no_share_link_once_they_have_set_a_password(client):
+    User.objects.create_user(username="anuj", password="x")
+    settled = User.objects.create_user(username="settled", password="chosen")
+    client.login(username="anuj", password="x")
+
+    body = client.get(reverse("accounts:members")).content.decode()
+
+    assert f"/accounts/members/{settled.pk}/link/" not in body
+
+
+def test_sharing_a_link_for_somebody_who_already_joined_is_refused(client):
+    User.objects.create_user(username="anuj", password="x")
+    settled = User.objects.create_user(username="settled", password="chosen")
+    client.login(username="anuj", password="x")
+
+    response = client.get(reverse("accounts:member_link", args=[settled.pk]))
+
+    assert response.status_code == 404
 
 
 def test_staff_can_invite_and_sees_a_link(client):

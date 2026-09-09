@@ -1,9 +1,24 @@
 {% load static %}<!doctype html>
 <html lang="en">
 <head>
+  <script>
+    // Applied before the first paint, so there is no flash of the wrong
+    // theme. Deliberately inline and blocking: a deferred script would paint
+    // light, then correct itself.
+    (function () {
+      try {
+        var choice = localStorage.getItem("flatsplit-theme");
+        if (choice === "light" || choice === "dark") {
+          document.documentElement.setAttribute("data-theme", choice);
+        }
+      } catch (e) {
+        /* private mode: fall back to the system setting */
+      }
+    })();
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffd43b">
+  <meta name="theme-color" content="#a78bfa">
   <title>Log in &middot; FlatSplit</title>
   <link rel="manifest" href="{% static 'manifest.json' %}">
   <link rel="icon" href="{% static 'icons/icon-192.png' %}">

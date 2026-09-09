@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Invite link &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-1">{{ member.name }} hasn't joined yet</h1>
+  <p class="text-body-secondary small mb-3">
+    Send them the link again. It works until they set a password.
+  </p>
+
+  <div class="card-flat">
+    {% include "accounts/_share_link.html" %}
+  </div>
+
+  <a class="btn btn-link w-100 mt-3 text-body-secondary"
+     href="{% url 'accounts:members' %}">Back to flatmates</a>
+{% endblock %}

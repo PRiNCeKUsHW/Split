@@ -8,7 +8,8 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import FormView, ListView, UpdateView, View
+from django.http import Http404
+from django.views.generic import DetailView, FormView, ListView, UpdateView, View
 
 from accounts.forms import FlatLoginForm, InviteFlatmateForm, MemberProfileForm
 from accounts.models import User
@@ -55,7 +56,11 @@ class MemberListView(ListView):
         return User.objects.all().order_by("-is_active_member", "id")
 
 
-class InviteFlatmateView(StaffOnlyMixin, FormView):
+class InviteFlatmateView(FormView):
+    """Open to every flatmate: gatekeeping who joins is friction with no
+    benefit when everyone already sees all the money. Editing someone
+    else's tenancy dates is still admin-only."""
+
     template_name = "accounts/invite.html"
     form_class = InviteFlatmateForm
 
@@ -64,10 +69,37 @@ class InviteFlatmateView(StaffOnlyMixin, FormView):
         return self.render_to_response(
             self.get_context_data(
                 form=self.form_class(),
-                created_user=user,
+                member=user,
                 invite_link=build_invite_link(user, self.request),
             )
         )
+
+
+class ShareInviteView(DetailView):
+    """Re-show the join link for somebody who has not set a password yet.
+
+    The token is derived from the current password hash, so it can be
+    regenerated at will and a mislaid link is never a dead end. Once they
+    have joined there is nothing to share, hence the 404.
+    """
+
+    model = User
+    template_name = "accounts/invite_link.html"
+    context_object_name = "member"
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def get_object(self, queryset=None):
+        member = super().get_object(queryset)
+        if member.has_usable_password():
+            raise Http404("This flatmate has already set a password.")
+        return member
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["invite_link"] = build_invite_link(self.object, self.request)
+        return context
 
 
 class MemberUpdateView(StaffOnlyMixin, UpdateView):

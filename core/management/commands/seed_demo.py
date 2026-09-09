@@ -151,7 +151,7 @@ class Command(BaseCommand):
             self.stdout.write(f"  removed {removed[label]} {label.split('.')[-1]}")
 
     def _make_flatmates(self, year: int, month: int) -> list:
-        people = []
+        people, reused = [], []
         for index, (username, name, upi, phone, joined) in enumerate(FLATMATES):
             # The last flatmate moves in on the 11th, so move-in proration
             # is visible on the rent without anyone having to set it up.
@@ -170,9 +170,22 @@ class Command(BaseCommand):
             if created:
                 person.set_password(PASSWORD)
                 person.save()
+            else:
+                reused.append(person.username)
             people.append(person)
 
         self.stdout.write(f"Flatmates: {', '.join(p.name for p in people)}")
+
+        if reused:
+            # Never touch a real account's password or dates. Say so, though:
+            # a silently half-seeded flat looks like the app is broken.
+            self.stdout.write(
+                self.style.WARNING(
+                    f"  {', '.join(reused)} already existed, so nothing about "
+                    "them was changed — not their password, name or move-in "
+                    "date. Run with --reset to replace them with demo data."
+                )
+            )
         return people
 
     def _make_away_periods(self, year, month, priya, rohit) -> None:

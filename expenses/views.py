@@ -3,16 +3,31 @@ from __future__ import annotations
 import datetime as dt
 
 from django.contrib import messages
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Count, Q
+from django.db.models.deletion import ProtectedError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, ListView, TemplateView, View
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+    View,
+)
 
 from core.services.audit import history_for
 from core.services.monthclose import is_closed
-from expenses.forms import CommentForm, DraftAmountForm, ExpenseFilterForm, ExpenseForm
-from expenses.models import Expense
+from expenses.forms import (
+    CategoryForm,
+    CommentForm,
+    DraftAmountForm,
+    ExpenseFilterForm,
+    ExpenseForm,
+)
+from expenses.models import Category, Expense
 from expenses.services.crud import (
     create_expense,
     delete_expense,
@@ -289,3 +304,71 @@ def _querystring_without_page(params) -> str:
         if key != "page" and value
     ]
     return "&".join(pairs)
+
+
+# ---------------------------------------------------------------- categories
+
+
+class CategoryListView(ListView):
+    model = Category
+    template_name = "expenses/category_list.html"
+    context_object_name = "categories"
+
+    def get_queryset(self):
+        return Category.objects.annotate(uses=Count("expenses")).order_by(
+            "sort_order", "name"
+        )
+
+
+class CategoryCreateView(CreateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = "expenses/category_form.html"
+    success_url = reverse_lazy("expenses:category_list")
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Added {form.cleaned_data['name']}.")
+        return super().form_valid(form)
+
+
+class CategoryUpdateView(UpdateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = "expenses/category_form.html"
+    success_url = reverse_lazy("expenses:category_list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Saved.")
+        return super().form_valid(form)
+
+
+class CategoryDeleteView(View):
+    """Deleting a category that is in use would orphan money, so it is refused.
+
+    Expense.category is PROTECT, so the database already stops it; this turns
+    the resulting ProtectedError into a sentence somebody can act on.
+    """
+
+    def post(self, request, pk):
+        category = get_object_or_404(Category, pk=pk)
+        try:
+            with transaction.atomic():
+                category.delete()
+        except ProtectedError:
+            expenses = category.expenses.count()
+            templates = category.recurring_templates.count()
+            blockers = []
+            if expenses:
+                blockers.append(f"{expenses} expense{'s' if expenses != 1 else ''}")
+            if templates:
+                blockers.append(
+                    f"{templates} recurring template{'s' if templates != 1 else ''}"
+                )
+            messages.error(
+                request,
+                f"{category.name} is still used by {' and '.join(blockers)}, "
+                "so it cannot be deleted. Rename it instead.",
+            )
+        else:
+            messages.success(request, f"Deleted {category.name}.")
+        return redirect("expenses:category_list")

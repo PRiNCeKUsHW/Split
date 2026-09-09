@@ -129,3 +129,39 @@ def test_reset_still_reseeds():
 
     assert User.objects.count() == 4
     assert Expense.objects.exists()
+
+
+def test_seeding_says_when_it_reused_a_real_account():
+    """A superuser you made yourself must keep its password and its dates.
+
+    Silently skipping it leaves a half-seeded flat that looks broken, so the
+    command has to say which accounts it left alone.
+    """
+    User.objects.create_superuser(username="anuj", password="my-real-password")
+
+    out = StringIO()
+    call_command("seed_demo", "--month=2026-09", stdout=out)
+    output = out.getvalue()
+
+    assert "anuj" in output
+    assert "already existed" in output
+
+
+def test_seeding_never_overwrites_an_existing_password():
+    User.objects.create_superuser(username="anuj", password="my-real-password")
+
+    _seed()
+
+    assert User.objects.get(username="anuj").check_password("my-real-password")
+
+
+def test_seeding_leaves_an_existing_accounts_move_in_date_alone():
+    import datetime as dt
+
+    User.objects.create_superuser(
+        username="anuj", password="x", joined_on=dt.date(2024, 1, 1)
+    )
+
+    _seed()
+
+    assert User.objects.get(username="anuj").joined_on == dt.date(2024, 1, 1)

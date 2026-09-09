@@ -5,9 +5,7 @@
 {% block content %}
   <div class="d-flex align-items-center mb-3">
     <h1 class="h5 mb-0">Flatmates</h1>
-    {% if user.is_staff %}
-      <a class="btn btn-primary btn-sm ms-auto" href="{% url 'accounts:invite' %}">Add</a>
-    {% endif %}
+    <a class="btn btn-primary btn-sm ms-auto" href="{% url 'accounts:invite' %}">Add</a>
   </div>
 
   <div class="card-flat">
@@ -26,7 +24,9 @@
             {% endif %}
           </span>
           <span class="lead-dots" aria-hidden="true"></span>
-          {% if user.is_staff %}
+          {% if not member.has_usable_login %}
+            <a class="badge-soft" href="{% url 'accounts:member_link' member.pk %}">Share link</a>
+          {% elif user.is_staff %}
             <a class="small" href="{% url 'accounts:member_edit' member.pk %}">Edit</a>
           {% endif %}
         </li>

@@ -42,6 +42,23 @@ class Category(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @property
+    def behaviour(self) -> str:
+        """The two flags as one plain-English choice, for forms and screens."""
+        if self.prorate_by_presence:
+            return "PRESENCE"
+        if self.prorate_by_tenancy:
+            return "TENANCY"
+        return "EVEN"
+
+    @property
+    def behaviour_label(self) -> str:
+        return {
+            "PRESENCE": "By days actually present",
+            "TENANCY": "By days lived here",
+            "EVEN": "Split evenly, always",
+        }[self.behaviour]
+
     def clean(self) -> None:
         super().clean()
         if self.prorate_by_presence and not self.prorate_by_tenancy:

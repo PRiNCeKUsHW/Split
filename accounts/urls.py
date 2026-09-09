@@ -12,6 +12,7 @@ urlpatterns = [
     path("members/", views.MemberListView.as_view(), name="members"),
     path("members/add/", views.InviteFlatmateView.as_view(), name="invite"),
     path("members/<int:pk>/edit/", views.MemberUpdateView.as_view(), name="member_edit"),
+    path("members/<int:pk>/link/", views.ShareInviteView.as_view(), name="member_link"),
     path(
         "set-password/<uidb64>/<token>/",
         views.SetPasswordView.as_view(),

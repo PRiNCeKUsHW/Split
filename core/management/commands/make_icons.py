@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from PIL import Image, ImageDraw, ImageFont
 
-MARIGOLD = (255, 212, 59, 255)
+ACTION = (167, 139, 250, 255)   # violet #a78bfa
 INK = (10, 10, 10, 255)
 
 
@@ -42,11 +42,11 @@ def _draw_icon(size: int, *, maskable: bool) -> Image.Image:
         # Maskable icons get cropped to a circle by the launcher, so the
         # background must bleed to the edges and the glyph stay in the
         # middle 80%.
-        draw.rectangle([0, 0, size, size], fill=MARIGOLD)
+        draw.rectangle([0, 0, size, size], fill=ACTION)
         glyph_size = int(size * 0.44)
     else:
         # Neobrutalism: flat fill, hard black border, no rounding.
-        draw.rectangle([0, 0, size - 1, size - 1], fill=MARIGOLD,
+        draw.rectangle([0, 0, size - 1, size - 1], fill=ACTION,
                        outline=INK, width=stroke)
         glyph_size = int(size * 0.58)
 

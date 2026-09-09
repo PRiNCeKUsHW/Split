@@ -151,10 +151,37 @@ netsh advfirewall firewall add rule name="FlatSplit" ^
 
 ### Adding flatmates
 
-Log in as an admin, then **Flat → Flatmates → Add**. You get a link to send
-them over WhatsApp. It lets them set their own password and stops working the
-moment they use it. There is no email backend, deliberately — one less thing to
-configure on a machine with no internet.
+**Any** flatmate can do this — gatekeeping who joins is friction with no
+benefit when everyone already sees all the money. Go to **Flat → Flatmates →
+Add**, then hit **Share** to open your phone's own share sheet (WhatsApp
+included) or **Copy link**.
+
+The link lets them pick their own password and stops working the moment they
+use it. There is no email backend, deliberately — one less thing to configure
+on a machine with no internet.
+
+Lost the link? The flatmates list shows **Share link** next to anyone who has
+not joined yet, and regenerates it. Changing someone else's tenancy dates or
+deactivating them stays admin-only.
+
+### Categories
+
+**Flat → Categories** lists what the flat spends on and lets you add your own.
+Instead of two confusing checkboxes, each category has one plain-English rule:
+
+| Rule | Prorated by | Use it for |
+|---|---|---|
+| Split evenly, always | nothing | one-off buys, shared gifts |
+| By days lived here | move-in / move-out | rent, WiFi, maintenance |
+| By days actually present | move-in **and** away days | food, gas, the maid |
+
+A category already used by an expense cannot be deleted — rename it instead.
+
+### Light and dark
+
+The button in the top bar cycles **Auto → Light → Dark**. Auto follows your
+phone. The choice is saved per device and applied before the page paints, so
+there is no flash of the wrong theme.
 
 ---
 

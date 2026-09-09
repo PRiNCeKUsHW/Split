@@ -7,16 +7,7 @@
 
   {% if invite_link %}
     <div class="card-flat mb-4">
-      <p class="eyebrow mb-2">Send this to {{ created_user.name }}</p>
-      <div class="link-box mb-2" id="invite-link">{{ invite_link }}</div>
-      <p class="text-body-secondary small mb-2">
-        The link works once and stops working as soon as they set a password.
-        There's no email here &mdash; copy it into WhatsApp yourself.
-      </p>
-      <button class="btn btn-primary w-100" type="button"
-              onclick="navigator.clipboard.writeText(document.getElementById('invite-link').textContent.trim()).then(()=>{this.textContent='Copied'})">
-        Copy link
-      </button>
+      {% include "accounts/_share_link.html" %}
     </div>
   {% endif %}
 

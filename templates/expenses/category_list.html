@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Categories &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center mb-1">
+    <h1 class="h5 mb-0">Categories</h1>
+    <a class="btn btn-primary btn-sm ms-auto" href="{% url 'expenses:category_add' %}">Add</a>
+  </div>
+  <p class="text-body-secondary small mb-3">
+    How each kind of expense gets split. Add your own for anything the flat
+    buys regularly.
+  </p>
+
+  <div class="card-flat">
+    <ul class="ledger mb-0">
+      {% for category in categories %}
+        <li>
+          <span class="cat-dot" style="background: {{ category.color }}"></span>
+          <span class="who">
+            <a class="text-reset" href="{% url 'expenses:category_edit' category.pk %}">
+              {{ category.name }}
+            </a>
+            <span class="note d-block">
+              {{ category.behaviour_label }}
+              {% if category.uses %}&middot; used {{ category.uses }} time{{ category.uses|pluralize }}{% endif %}
+            </span>
+          </span>
+          <span class="lead-dots" aria-hidden="true"></span>
+          {% if not category.uses %}
+            <form method="post" action="{% url 'expenses:category_delete' category.pk %}"
+                  data-confirm="Delete {{ category.name }}?">
+              {% csrf_token %}
+              <button class="badge-soft" type="submit"
+                      style="background: var(--debit-fill)">Delete</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card-flat mt-3">
+    <p class="eyebrow mb-2">What the three behaviours mean</p>
+    <ul class="ledger mb-0">
+      <li class="d-block">
+        <strong class="small">Split evenly, always</strong>
+        <span class="note d-block">Everyone chosen pays the same, whatever the dates.</span>
+      </li>
+      <li class="d-block">
+        <strong class="small">By days lived here</strong>
+        <span class="note d-block">
+          Prorated by move-in and move-out. A holiday does <em>not</em> reduce it &mdash;
+          your room still costs what it costs.
+        </span>
+      </li>
+      <li class="d-block">
+        <strong class="small">By days actually present</strong>
+        <span class="note d-block">
+          Also discounts away days. For anything consumed &mdash; food, gas, the maid.
+        </span>
+      </li>
+    </ul>
+  </div>
+{% endblock %}

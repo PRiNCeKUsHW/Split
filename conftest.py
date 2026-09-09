@@ -50,7 +50,7 @@ def groceries(db):
 
     category, _ = Category.objects.update_or_create(
         name="Groceries",
-        defaults=dict(icon="basket", color="#0b7a4b",
+        defaults=dict(icon="basket", color="#bef264",
                       prorate_by_tenancy=True, prorate_by_presence=True),
     )
     return category
@@ -62,7 +62,7 @@ def rent(db):
 
     category, _ = Category.objects.update_or_create(
         name="Rent",
-        defaults=dict(icon="home", color="#3a34c9", is_recurring_by_default=True,
+        defaults=dict(icon="home", color="#a78bfa", is_recurring_by_default=True,
                       prorate_by_tenancy=True, prorate_by_presence=False),
     )
     return category
@@ -72,7 +72,7 @@ def rent(db):
 def one_off(db):
     from expenses.models import Category
 
-    return Category.objects.create(name="One-off", icon="tag", color="#c42b4b")
+    return Category.objects.create(name="One-off", icon="tag", color="#fb7185")
 
 
 @pytest.fixture

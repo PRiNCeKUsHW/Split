@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edit category{% else %}New category{% endif %} &middot; FlatSplit{% endblock %}
+
+{% block content %}
+  <h1 class="h5 mb-3">{% if object %}Edit {{ object.name }}{% else %}New category{% endif %}</h1>
+
+  <form method="post" class="card-flat">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2 px-3" role="alert">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.name.id_for_label }}">Name</label>
+      {{ form.name }}
+      {% for error in form.name.errors %}
+        <div class="text-danger small mt-1" role="alert">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <p class="form-label mb-2">Colour</p>
+    <div class="swatch-row mb-3">
+      {% for choice in form.color %}
+        <label class="swatch" title="{{ choice.choice_label }}">
+          {{ choice.tag }}
+          <span class="swatch-dot" style="background: {{ choice.data.value }}"></span>
+          <span class="visually-hidden">{{ choice.choice_label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+    {% for error in form.color.errors %}
+      <div class="text-danger small mb-2" role="alert">{{ error }}</div>
+    {% endfor %}
+
+    <p class="form-label mb-2">{{ form.behaviour.label }}</p>
+    <div class="mb-3">
+      {% for row in form.behaviour_rows %}
+        <label class="behaviour-option">
+          {{ row.choice.tag }}
+          <span>
+            <strong>{{ row.choice.choice_label }}</strong>
+            <span class="note d-block">{{ row.help }}</span>
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+    {% for error in form.behaviour.errors %}
+      <div class="text-danger small mb-2" role="alert">{{ error }}</div>
+    {% endfor %}
+
+    {{ form.icon }}
+
+    <button type="submit" class="btn btn-primary btn-lg w-100">
+      {% if object %}Save changes{% else %}Add category{% endif %}
+    </button>
+  </form>
+
+  <a class="btn btn-link w-100 mt-2 text-body-secondary"
+     href="{% url 'expenses:category_list' %}">Cancel</a>
+{% endblock %}

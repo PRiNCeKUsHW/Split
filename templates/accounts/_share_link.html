@@ -1,0 +1,61 @@
+{# Shared by the invite screen and the re-share screen. #}
+<p class="eyebrow mb-2">Send this to {{ member.name }}</p>
+
+<div class="link-box mb-2" id="invite-link">{{ invite_link }}</div>
+
+<p class="text-body-secondary small mb-3">
+  The link lets them pick their own password, and stops working the moment
+  they use it. There is no email here &mdash; send it yourself.
+</p>
+
+<div class="d-flex gap-2">
+  {# navigator.share opens the phone's own sheet, WhatsApp included, and
+     needs no network to open. Hidden where the browser has no support. #}
+  <button class="btn btn-primary flex-grow-1" type="button" data-share hidden
+          data-share-title="Join our FlatSplit"
+          data-share-text="Set your password and you're in:">
+    Share
+  </button>
+  <button class="btn btn-outline-secondary flex-grow-1" type="button" data-copy>
+    <span class="copy-idle">Copy link</span>
+    <span class="copy-done" hidden>Copied</span>
+  </button>
+</div>
+
+<script>
+  (function () {
+    var link = document.getElementById("invite-link").textContent.trim();
+
+    var share = document.querySelector("[data-share]");
+    if (share && navigator.share) {
+      share.hidden = false;
+      share.addEventListener("click", function () {
+        navigator.share({
+          title: share.dataset.shareTitle,
+          text: share.dataset.shareText,
+          url: link,
+        }).catch(function () { /* the user dismissed the sheet */ });
+      });
+    }
+
+    var copy = document.querySelector("[data-copy]");
+    if (copy) {
+      copy.addEventListener("click", function () {
+        var done = function () {
+          copy.querySelector(".copy-idle").hidden = true;
+          copy.querySelector(".copy-done").hidden = false;
+        };
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(link).then(done);
+        } else {
+          // http:// on a LAN IP is not a secure context, so the Clipboard
+          // API is unavailable on some phones. Select the text instead.
+          var range = document.createRange();
+          range.selectNodeContents(document.getElementById("invite-link"));
+          window.getSelection().removeAllRanges();
+          window.getSelection().addRange(range);
+        }
+      });
+    }
+  })();
+</script>

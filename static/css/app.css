@@ -35,20 +35,21 @@
 :root {
   /* Ink and ground */
   --ink: #0a0a0a;
-  --paper: #fff8e7;          /* warm cream, never pure white */
+  --paper: #fafaf9;          /* bone, never pure white */
   --surface: #ffffff;
-  --muted: #57544d;          /* 7.1:1 on cream, 7.6:1 on white */
+  --muted: #57534e;          /* 7.3:1 on bone, 7.6:1 on white */
 
-  /* Flat fills. Text on any of these is ALWAYS --ink. */
-  --marigold: #ffd43b;       /* primary action    13.9:1 with ink */
-  --mint: #7bf1a8;           /* you are owed      14.1:1 */
-  --blush: #ff8fa3;          /* you owe            9.2:1 */
-  --sky: #7dd3fc;            /* information       11.9:1 */
-  --lilac: #c4b5fd;
+  /* Flat fills. Text on any of these is ALWAYS black, which is both the
+     authentic look and why they all clear AA at 7:1 or better. */
+  --action: #a78bfa;         /* violet   7.3:1  — deliberately not green or
+                                red, so it never competes with the money pair */
+  --credit-fill: #bef264;    /* lime    15.2:1  you are owed */
+  --debit-fill: #fb7185;     /* rose     7.4:1  you owe */
+  --info-fill: #67e8f9;      /* cyan    13.7:1  neutral information */
 
   /* Semantic text colours, only ever on paper or surface */
-  --credit: #067647;         /* 5.7:1 on white */
-  --debit: #c1121f;          /* 6.2:1 on white */
+  --credit: #15803d;         /* 5.0:1 on white */
+  --debit: #be123c;          /* 6.3:1 on white */
 
   /* The three numbers that define the whole style */
   --border-w: 3px;
@@ -100,14 +101,14 @@ a:hover { color: var(--ink); }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ink: #f5f3ec;
-    --paper: #17171a;
-    --surface: #232327;
-    --muted: #a8a49b;        /* 7.2:1 on paper, 6.3:1 on surface */
+    --ink: #f4f2ee;
+    --paper: #14131a;
+    --surface: #1e1c26;
+    --muted: #a8a29e;          /* 7.3:1 on paper, 6.7:1 on surface */
 
-    /* Fills keep their black text — they are bright in both themes. */
-    --credit: #5ce896;       /* 10.0:1 on dark surface */
-    --debit: #ff9faf;        /*  8.1:1 on dark surface */
+    /* Fills are bright in both themes and keep their black text. */
+    --credit: #86efac;         /* 12.0:1 on dark surface */
+    --debit: #fda4af;          /*  8.9:1 on dark surface */
 
     --line: var(--ink);
     --shadow: var(--shadow-off) var(--shadow-off) 0 var(--ink);
@@ -124,6 +125,35 @@ a:hover { color: var(--ink); }
     --bs-link-hover-color-rgb: 245, 243, 236;
   }
 }
+
+/* Same tokens again for an explicit choice. Plain CSS cannot share a
+   block across a media-query boundary, so these are duplicated and a test
+   asserts the two stay identical. */
+:root[data-theme="dark"] {
+  --ink: #f4f2ee;
+  --paper: #14131a;
+  --surface: #1e1c26;
+  --muted: #a8a29e;          /* 7.3:1 on paper, 6.7:1 on surface */
+
+  /* Fills are bright in both themes and keep their black text. */
+  --credit: #86efac;         /* 12.0:1 on dark surface */
+  --debit: #fda4af;          /*  8.9:1 on dark surface */
+
+  --line: var(--ink);
+  --shadow: var(--shadow-off) var(--shadow-off) 0 var(--ink);
+  --shadow-sm: 2px 2px 0 var(--ink);
+  --shadow-lg: 6px 6px 0 var(--ink);
+
+  --bs-secondary-color: var(--muted);
+  --bs-tertiary-color: var(--muted);
+  --bs-emphasis-color: var(--ink);
+  --bs-heading-color: var(--ink);
+  --bs-secondary-bg: var(--surface);
+  --bs-tertiary-bg: var(--surface);
+  --bs-link-color-rgb: 245, 243, 236;
+  --bs-link-hover-color-rgb: 245, 243, 236;
+}
+
 
 /* Fills always pair with true black text, in both themes. */
 .on-fill,
@@ -195,8 +225,8 @@ summary:focus-visible {
   box-shadow: var(--shadow-lg);
   background: var(--surface);
 }
-.balance-hero.is-credit  { background: var(--mint); }
-.balance-hero.is-debit   { background: var(--blush); }
+.balance-hero.is-credit  { background: var(--credit-fill); }
+.balance-hero.is-debit   { background: var(--debit-fill); }
 .balance-hero.is-settled { background: var(--surface); }
 .balance-hero.is-credit .eyebrow,
 .balance-hero.is-debit .eyebrow,
@@ -265,7 +295,7 @@ summary:focus-visible {
   align-items: center;
   gap: 0.625rem;
   padding: 0.5rem 1rem;
-  background: var(--marigold);
+  background: var(--action);
   color: #0a0a0a;
   border-bottom: var(--border-w) solid var(--ink);
   position: sticky;
@@ -327,7 +357,7 @@ summary:focus-visible {
   border-right: 2px solid var(--ink);
 }
 .bottom-nav a:last-child { border-right: 0; }
-.bottom-nav a.active { background: var(--marigold); color: #0a0a0a; }
+.bottom-nav a.active { background: var(--action); color: #0a0a0a; }
 .bottom-nav a svg { width: 22px; height: 22px; }
 .bottom-nav a:active { background: var(--ink); color: var(--paper); }
 .bottom-nav a.active:active { background: var(--ink); color: var(--paper); }
@@ -337,7 +367,7 @@ summary:focus-visible {
   position: absolute;
   top: -22px;
   width: 56px; height: 56px;
-  background: var(--marigold);
+  background: var(--action);
   border: var(--border-w) solid var(--ink);
   box-shadow: var(--shadow);
   display: grid; place-items: center;
@@ -374,30 +404,30 @@ summary:focus-visible {
 }
 
 .btn-primary {
-  --bs-btn-bg: var(--marigold);
+  --bs-btn-bg: var(--action);
   --bs-btn-color: #0a0a0a;
-  --bs-btn-hover-bg: var(--marigold);
+  --bs-btn-hover-bg: var(--action);
   --bs-btn-hover-color: #0a0a0a;
-  --bs-btn-active-bg: var(--marigold);
+  --bs-btn-active-bg: var(--action);
   --bs-btn-active-color: #0a0a0a;
-  --bs-btn-disabled-bg: var(--marigold);
+  --bs-btn-disabled-bg: var(--action);
   --bs-btn-disabled-color: #0a0a0a;
   --bs-btn-border-color: var(--ink);
 }
 .btn-outline-secondary {
   --bs-btn-bg: var(--surface);
   --bs-btn-color: var(--ink);
-  --bs-btn-hover-bg: var(--sky);
+  --bs-btn-hover-bg: var(--info-fill);
   --bs-btn-hover-color: #0a0a0a;
-  --bs-btn-active-bg: var(--sky);
+  --bs-btn-active-bg: var(--info-fill);
   --bs-btn-active-color: #0a0a0a;
 }
 .btn-outline-danger {
   --bs-btn-bg: var(--surface);
   --bs-btn-color: var(--debit);
-  --bs-btn-hover-bg: var(--blush);
+  --bs-btn-hover-bg: var(--debit-fill);
   --bs-btn-hover-color: #0a0a0a;
-  --bs-btn-active-bg: var(--blush);
+  --bs-btn-active-bg: var(--debit-fill);
   --bs-btn-active-color: #0a0a0a;
 }
 .btn-link { box-shadow: none; border: 0 !important; min-height: 44px; }
@@ -439,7 +469,7 @@ summary:focus-visible {
   background-color: var(--surface);
 }
 .form-check-input:checked {
-  background-color: var(--marigold);
+  background-color: var(--action);
   border-color: var(--ink);
 }
 .form-check-input:focus {
@@ -456,11 +486,11 @@ summary:focus-visible {
   color: #0a0a0a;
   font-weight: 600;
 }
-.alert-success { background: var(--mint); }
-.alert-info    { background: var(--sky); }
-.alert-warning { background: var(--marigold); }
+.alert-success { background: var(--credit-fill); }
+.alert-info    { background: var(--info-fill); }
+.alert-warning { background: var(--action); }
 .alert-danger,
-.alert-error   { background: var(--blush); }   /* Django tags 'error', not 'danger' */
+.alert-error   { background: var(--debit-fill); }   /* Django tags 'error', not 'danger' */
 .alert-secondary { background: var(--surface); color: var(--ink); }
 
 .text-danger { color: var(--debit) !important; font-weight: 600; }
@@ -492,7 +522,7 @@ summary:focus-visible {
   font-family: var(--mono);
   font-size: 0.8125rem;
   word-break: break-all;
-  background: var(--sky);
+  background: var(--info-fill);
   color: #0a0a0a;
   border: var(--border-w) solid var(--ink);
   box-shadow: var(--shadow-sm);
@@ -515,7 +545,7 @@ summary:focus-visible {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  background: var(--marigold);
+  background: var(--action);
   color: #0a0a0a;
   border: 2px solid var(--ink);
   box-shadow: var(--shadow-sm);
@@ -538,7 +568,7 @@ summary:focus-visible {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--marigold);
+  background: var(--action);
   border: var(--border-w) solid var(--ink);
   box-shadow: var(--shadow);
   padding: 0.85rem 1rem;
@@ -588,7 +618,7 @@ summary:focus-visible {
   transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
 .chip input { position: absolute; opacity: 0; pointer-events: none; }
-.chip:has(input:checked) { background: var(--marigold); }
+.chip:has(input:checked) { background: var(--action); }
 .chip:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
 
 /* --- Split-type tabs ---------------------------------------------------- */
@@ -618,7 +648,7 @@ summary:focus-visible {
 }
 .tab:last-child { border-right: 0; }
 .tab input { position: absolute; opacity: 0; pointer-events: none; }
-.tab:has(input:checked), .tab.is-active { background: var(--marigold); color: #0a0a0a; }
+.tab:has(input:checked), .tab.is-active { background: var(--action); color: #0a0a0a; }
 .tab:active { background: var(--ink); color: var(--paper); }
 
 .split-input { flex: none; width: 96px; }
@@ -660,7 +690,7 @@ summary:focus-visible {
   align-items: center;
   transition: transform 120ms steps(2), box-shadow 120ms steps(2);
 }
-.month-pill.is-active { background: var(--marigold); }
+.month-pill.is-active { background: var(--action); }
 .month-pill:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
 
 /* --- Category dot ------------------------------------------------------- */
@@ -746,7 +776,7 @@ details[open] summary::before { content: "− "; }
   clip-path: inset(50%);
   white-space: nowrap;
   z-index: 100;
-  background: var(--marigold);
+  background: var(--action);
   color: #0a0a0a;
   border: var(--border-w) solid var(--ink);
   padding: 0.75rem 1rem;
@@ -768,4 +798,87 @@ details[open] summary::before { content: "− "; }
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* --- Theme toggle -------------------------------------------------------- */
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  padding: 0;
+  transition: transform 120ms steps(2), box-shadow 120ms steps(2);
+}
+.theme-toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.theme-toggle svg { width: 20px; height: 20px; }
+
+/* Only the icon for the current mode is shown. Default (no data-mode yet,
+   i.e. before the script runs) shows the auto glyph. */
+.theme-toggle .icon-light,
+.theme-toggle .icon-dark { display: none; }
+.theme-toggle[data-mode="light"] .icon-auto,
+.theme-toggle[data-mode="light"] .icon-dark { display: none; }
+.theme-toggle[data-mode="light"] .icon-light { display: block; }
+.theme-toggle[data-mode="dark"] .icon-auto,
+.theme-toggle[data-mode="dark"] .icon-light { display: none; }
+.theme-toggle[data-mode="dark"] .icon-dark { display: block; }
+
+/* --- Category editor ----------------------------------------------------- */
+
+.swatch-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform 120ms steps(2), box-shadow 120ms steps(2);
+}
+.swatch input { position: absolute; opacity: 0; pointer-events: none; }
+.swatch-dot { width: 26px; height: 26px; border: 2px solid var(--ink); }
+.swatch:has(input:checked) { box-shadow: var(--shadow-lg); }
+.swatch:has(input:checked) .swatch-dot { width: 34px; height: 34px; }
+.swatch:has(input:focus-visible) { outline: 3px solid var(--ink); outline-offset: 3px; }
+.swatch:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+
+.behaviour-option {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.8rem;
+  margin-bottom: 0.6rem;
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+  cursor: pointer;
+  min-height: 44px;
+}
+.behaviour-option:has(input:checked) { background: var(--action); color: #0a0a0a; }
+.behaviour-option:has(input:checked) .note { color: #0a0a0a; }
+.behaviour-option:has(input:focus-visible) { outline: 3px solid var(--ink); outline-offset: 3px; }
+.behaviour-option input { margin-top: 0.15rem; flex: none; }
+
+/* Raw radios inside the pickers use the browser accent unless told otherwise,
+   which shows up as a stray blue dot on a violet fill. */
+.behaviour-option input[type="radio"],
+.chip input,
+.tab input {
+  accent-color: var(--ink);
+}
+.behaviour-option input[type="radio"] {
+  width: 1.15rem;
+  height: 1.15rem;
 }
