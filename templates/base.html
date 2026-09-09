@@ -45,12 +45,7 @@
       <div class="ms-auto d-flex align-items-center gap-2">
         {% block topbar_actions %}{% endblock %}
         <button type="button" class="theme-toggle" data-theme-toggle
-                aria-label="Theme: system. Switch to light.">
-          <svg class="icon-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="8"/><path d="M12 4v16" fill="currentColor"/>
-            <path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>
-          </svg>
+                aria-label="Switch between light and dark">
           <svg class="icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
             <circle cx="12" cy="12" r="4.5"/>
@@ -94,32 +89,34 @@
 
     // Theme cycling. "auto" removes the attribute and lets the OS decide.
     (function () {
-      var ORDER = ["auto", "light", "dark"];
+      var ORDER = ["light", "dark"];
       var root = document.documentElement;
       var button = document.querySelector("[data-theme-toggle]");
       if (!button) return;
 
       function current() {
-        return root.getAttribute("data-theme") || "auto";
-      }
-      function label(mode) {
-        var next = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length];
-        return "Theme: " + mode + ". Switch to " + next + ".";
+        var set = root.getAttribute("data-theme");
+        if (set === "light" || set === "dark") return set;
+        // Nothing chosen yet: report what the phone is already showing, so
+        // the first tap is a real change rather than a no-op.
+        return window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
       }
       function apply(mode) {
-        if (mode === "auto") {
-          root.removeAttribute("data-theme");
-        } else {
-          root.setAttribute("data-theme", mode);
-        }
+        root.setAttribute("data-theme", mode);
         button.setAttribute("data-mode", mode);
-        button.setAttribute("aria-label", label(mode));
+        button.setAttribute(
+          "aria-label",
+          "Theme: " + mode + ". Switch to " + (mode === "dark" ? "light" : "dark") + "."
+        );
         try { localStorage.setItem("flatsplit-theme", mode); } catch (e) {}
       }
 
       apply(current());
       button.addEventListener("click", function () {
-        apply(ORDER[(ORDER.indexOf(current()) + 1) % ORDER.length]);
+        apply(current() === "dark" ? "light" : "dark");
       });
     })();
 

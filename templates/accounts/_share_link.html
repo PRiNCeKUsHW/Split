@@ -1,4 +1,11 @@
-{# Shared by the invite screen and the re-share screen. #}
+{% comment %}
+  Shared by the invite screen and the re-share screen.
+
+  Both navigator.share and navigator.clipboard require a secure context, and
+  http:// on a LAN IP is not one — so on the phones this app is actually used
+  from, neither exists. Share is therefore shown only when the browser offers
+  it, and copy falls back to execCommand, which still works on plain http.
+{% endcomment %}
 <p class="eyebrow mb-2">Send this to {{ member.name }}</p>
 
 <div class="link-box mb-2" id="invite-link">{{ invite_link }}</div>
@@ -9,8 +16,6 @@
 </p>
 
 <div class="d-flex gap-2">
-  {# navigator.share opens the phone's own sheet, WhatsApp included, and
-     needs no network to open. Hidden where the browser has no support. #}
   <button class="btn btn-primary flex-grow-1" type="button" data-share hidden
           data-share-title="Join our FlatSplit"
           data-share-text="Set your password and you're in:">
@@ -22,9 +27,16 @@
   </button>
 </div>
 
+<p class="form-text small mt-2 mb-0" data-copy-hint hidden>
+  This browser will not let the page copy for you over plain http. The link is
+  selected &mdash; long-press it and choose Copy.
+</p>
+
 <script>
   (function () {
-    var link = document.getElementById("invite-link").textContent.trim();
+    var box = document.getElementById("invite-link");
+    var link = box.textContent.trim();
+    var copy = document.querySelector("[data-copy]");
 
     var share = document.querySelector("[data-share]");
     if (share && navigator.share) {
@@ -38,22 +50,58 @@
       });
     }
 
-    var copy = document.querySelector("[data-copy]");
+    function markCopied() {
+      copy.querySelector(".copy-idle").hidden = true;
+      copy.querySelector(".copy-done").hidden = false;
+    }
+
+    function selectTheLink() {
+      var range = document.createRange();
+      range.selectNodeContents(box);
+      var selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      var hint = document.querySelector("[data-copy-hint]");
+      if (hint) hint.hidden = false;
+    }
+
+    // Works on plain http, where navigator.clipboard does not exist. The
+    // textarea must be in the document and laid out for the engine to select
+    // it, hence off-screen positioning rather than display:none.
+    function legacyCopy() {
+      var field = document.createElement("textarea");
+      field.value = link;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.top = "0";
+      field.style.left = "-9999px";
+      document.body.appendChild(field);
+      field.select();
+      field.setSelectionRange(0, link.length);
+      var worked = false;
+      try {
+        worked = document.execCommand("copy");
+      } catch (error) {
+        worked = false;
+      }
+      document.body.removeChild(field);
+      return worked;
+    }
+
+    function fallback() {
+      if (legacyCopy()) {
+        markCopied();
+      } else {
+        selectTheLink();
+      }
+    }
+
     if (copy) {
       copy.addEventListener("click", function () {
-        var done = function () {
-          copy.querySelector(".copy-idle").hidden = true;
-          copy.querySelector(".copy-done").hidden = false;
-        };
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(link).then(done);
+        if (window.isSecureContext && navigator.clipboard) {
+          navigator.clipboard.writeText(link).then(markCopied, fallback);
         } else {
-          // http:// on a LAN IP is not a secure context, so the Clipboard
-          // API is unavailable on some phones. Select the text instead.
-          var range = document.createRange();
-          range.selectNodeContents(document.getElementById("invite-link"));
-          window.getSelection().removeAllRanges();
-          window.getSelection().addRange(range);
+          fallback();
         }
       });
     }

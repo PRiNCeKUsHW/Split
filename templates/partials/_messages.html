@@ -1,9 +1,11 @@
 {% if messages %}
   <div class="mb-3">
     {% for message in messages %}
-      {# Django tags are debug/info/success/warning/error; Bootstrap has no
-         alert-error, so map it. app.css also defines .alert-error as a
-         belt-and-braces fallback. #}
+      {% comment %}
+        Django tags are debug/info/success/warning/error; Bootstrap has no
+        alert-error, so map it. app.css also defines .alert-error as a
+        belt-and-braces fallback.
+      {% endcomment %}
       <div class="alert py-2 px-3 mb-2 {% if message.level_tag == 'error' %}alert-danger{% elif message.level_tag == 'debug' %}alert-secondary{% else %}alert-{{ message.level_tag }}{% endif %}"
            role="{% if message.level_tag == 'error' %}alert{% else %}status{% endif %}">
         {{ message }}

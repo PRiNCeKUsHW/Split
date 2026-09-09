@@ -821,14 +821,9 @@ details[open] summary::before { content: "− "; }
 }
 .theme-toggle svg { width: 20px; height: 20px; }
 
-/* Only the icon for the current mode is shown. Default (no data-mode yet,
-   i.e. before the script runs) shows the auto glyph. */
-.theme-toggle .icon-light,
+/* Show the glyph for the mode you are in. Before the script runs neither
+   is hidden by data-mode, so default to the sun. */
 .theme-toggle .icon-dark { display: none; }
-.theme-toggle[data-mode="light"] .icon-auto,
-.theme-toggle[data-mode="light"] .icon-dark { display: none; }
-.theme-toggle[data-mode="light"] .icon-light { display: block; }
-.theme-toggle[data-mode="dark"] .icon-auto,
 .theme-toggle[data-mode="dark"] .icon-light { display: none; }
 .theme-toggle[data-mode="dark"] .icon-dark { display: block; }
 
