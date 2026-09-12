@@ -43,4 +43,8 @@ urlpatterns = [
 
     # Activity
     path("activity", views.activity_list, name="activity_list"),
+
+    # Summary (Flat Tab)
+    path("summary", views.summary_view, name="summary_view"),
+    path("month/toggle", views.month_toggle, name="month_toggle"),
 ]

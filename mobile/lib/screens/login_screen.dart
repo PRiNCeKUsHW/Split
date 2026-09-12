@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../theme/colors.dart';
 import '../theme/neobrutalism.dart';
+import 'main_shell.dart';
 import 'server_config_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -29,14 +30,26 @@ class _LoginScreenState extends State<LoginScreen> {
     if (username.isEmpty) return;
 
     final appState = Provider.of<AppState>(context, listen: false);
-    await appState.login(username, password);
+    final ok = await appState.login(username, password);
+    if (ok && mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const MainShell()),
+        (route) => false,
+      );
+    }
   }
 
   void _quickLogin(String username) async {
     _usernameController.text = username;
     _passwordController.text = 'flatsplit';
     final appState = Provider.of<AppState>(context, listen: false);
-    await appState.login(username, 'flatsplit');
+    final ok = await appState.login(username, 'flatsplit');
+    if (ok && mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const MainShell()),
+        (route) => false,
+      );
+    }
   }
 
   @override

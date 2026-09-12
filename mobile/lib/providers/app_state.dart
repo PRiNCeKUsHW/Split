@@ -45,6 +45,7 @@ class AppState extends ChangeNotifier {
   // Recurring & Away
   List<Map<String, dynamic>> _recurringTemplates = [];
   List<Map<String, dynamic>> _awayPeriods = [];
+  Map<String, dynamic>? _summary;
 
   // Getters
   User? get currentUser => _currentUser;
@@ -54,6 +55,7 @@ class AppState extends ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
   String get serverUrl => _client.baseUrl;
   String get flatName => 'FlatSplit';
+  Map<String, dynamic>? get summary => _summary;
 
   String get myBalance => _myBalance;
   String get myBalanceMagnitude => _myBalanceMagnitude;
@@ -174,6 +176,7 @@ class AppState extends ChangeNotifier {
       fetchSettlements(),
       fetchRecurring(),
       fetchAwayPeriods(),
+      fetchSummary(),
     ]);
   }
 
@@ -479,6 +482,36 @@ class AppState extends ChangeNotifier {
       final res = await _client.post('/api/away/$id/delete');
       if (res.statusCode == 200) {
         await fetchAwayPeriods();
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  Future<void> fetchSummary({int? year, int? month}) async {
+    try {
+      String path = '/api/summary';
+      if (year != null && month != null) {
+        path += '?year=$year&month=$month';
+      }
+      final res = await _client.get(path);
+      if (res.statusCode == 200) {
+        _summary = json.decode(res.body) as Map<String, dynamic>;
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  Future<bool> toggleMonth({required int year, required int month, required bool reopen}) async {
+    try {
+      final res = await _client.post('/api/month/toggle', data: {
+        'year': year,
+        'month': month,
+        'action': reopen ? 'reopen' : 'close',
+      });
+      if (res.statusCode == 200) {
+        await fetchSummary(year: year, month: month);
+        await refreshAll();
         return true;
       }
     } catch (_) {}

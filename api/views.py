@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from accounts.models import AwayPeriod
 from core.models import AuditLog, MonthClose
 from core.services.audit import record_create, record_update
-from core.services.monthclose import assert_open, is_closed
+from core.services.monthclose import assert_open, close_month, is_closed, reopen_month
 from expenses.forms import ExpenseForm
 from expenses.models import Category, Comment, Expense, ExpenseShare
 from expenses.services.crud import (
@@ -967,3 +967,110 @@ def activity_list(request):
         for l in logs
     ]
     return JsonResponse({"activity": out})
+
+
+# ==============================================================================
+# Summary (Flat Tab)
+# ==============================================================================
+
+@json_auth_required
+def summary_view(request):
+    today = dt.date.today()
+    try:
+        year = int(request.GET.get("year", today.year))
+        month = int(request.GET.get("month", today.month))
+    except (ValueError, TypeError):
+        year, month = today.year, today.month
+
+    expenses = Expense.objects.countable().for_month(year, month)
+    members = list(User.objects.active())
+
+    by_category = list(
+        expenses.values("category__name", "category__color")
+        .annotate(total=Sum("amount"))
+        .order_by("-total")
+    )
+    grand_total = sum((row["total"] for row in by_category), ZERO)
+    for row in by_category:
+        row["percent"] = (
+            float(row["total"] / grand_total * 100) if grand_total else 0.0
+        )
+        row["total"] = str(row["total"])
+
+    paid_by_person = {
+        row["paid_by"]: row["total"]
+        for row in expenses.values("paid_by").annotate(total=Sum("amount"))
+    }
+    owed_by_person = {
+        row["user"]: row["total"]
+        for row in ExpenseShare.objects.filter(
+            expense__in=expenses
+        ).values("user").annotate(total=Sum("amount_owed"))
+    }
+
+    per_person = [
+        {
+            "person": _serialize_user(person),
+            "paid": str(paid_by_person.get(person.pk, ZERO)),
+            "share": str(owed_by_person.get(person.pk, ZERO)),
+            "diff": str(paid_by_person.get(person.pk, ZERO) - owed_by_person.get(person.pk, ZERO)),
+            "diff_num": float(paid_by_person.get(person.pk, ZERO) - owed_by_person.get(person.pk, ZERO)),
+        }
+        for person in members
+    ]
+
+    is_closed_month = is_closed(dt.date(year, month, 1))
+
+    prev_m = 12 if month == 1 else month - 1
+    prev_y = year - 1 if month == 1 else year
+    next_m = 1 if month == 12 else month + 1
+    next_y = year + 1 if month == 12 else year
+
+    return JsonResponse({
+        "year": year,
+        "month": month,
+        "month_label": dt.date(year, month, 1).strftime("%B %Y"),
+        "grand_total": str(grand_total),
+        "expense_count": expenses.count(),
+        "is_closed": is_closed_month,
+        "prev_year": prev_y,
+        "prev_month": prev_m,
+        "next_year": next_y,
+        "next_month": next_m,
+        "by_category": by_category,
+        "per_person": per_person,
+    })
+
+
+@csrf_exempt
+@json_auth_required
+def month_toggle(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    data = {}
+    if request.body:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            pass
+    if not data:
+        data = request.POST
+
+    try:
+        year = int(data.get("year", dt.date.today().year))
+        month = int(data.get("month", dt.date.today().month))
+    except (ValueError, TypeError):
+        return JsonResponse({"error": "Invalid year/month"}, status=400)
+
+    action = data.get("action")
+    if action == "reopen":
+        reopen_month(year=year, month=month, actor=request.user)
+    else:
+        close_month(year=year, month=month, actor=request.user)
+
+    return JsonResponse({
+        "ok": True,
+        "is_closed": is_closed(dt.date(year, month, 1)),
+    })
+
