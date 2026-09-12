@@ -515,9 +515,9 @@ class _FlatScreenState extends State<FlatScreen> {
                 'AWAY DAYS',
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
-                  color: isDark ? AppColors.darkMuted : AppColors.muted,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                  color: inkColor,
                 ),
               ),
               GestureDetector(
@@ -531,11 +531,29 @@ class _FlatScreenState extends State<FlatScreen> {
           ),
           const SizedBox(height: 8),
           NeobrutalCard(
-            backgroundColor: AppColors.infoFill.withValues(alpha: 0.3),
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              'Both dates count (5th–8th = 4 days). Away days only discount categories flagged "prorate by away days" (food, maid, gas). Rent is never reduced by travel.',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, height: 1.4, color: inkColor),
+            backgroundColor: isDark ? const Color(0xFF1E293B) : AppColors.infoFill,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 20,
+                  color: isDark ? AppColors.infoFill : Colors.black,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Both dates count (5th–8th = 4 days). Away days only discount categories flagged "prorate by away days" (food, maid, gas). Rent is never reduced by travel.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                      color: isDark ? AppColors.darkInk : Colors.black,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -591,9 +609,9 @@ class _FlatScreenState extends State<FlatScreen> {
             'FLATMATES',
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.8,
-              color: isDark ? AppColors.darkMuted : AppColors.muted,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
+              color: inkColor,
             ),
           ),
           const SizedBox(height: 8),
