@@ -65,6 +65,7 @@ def _serialize_user(user: User | None) -> dict:
             "upi_id": "",
             "initials": "?",
             "is_active_member": False,
+            "is_staff": False,
             "joined_on": None,
             "left_on": None,
         }
@@ -76,6 +77,7 @@ def _serialize_user(user: User | None) -> dict:
         "upi_id": user.upi_id,
         "initials": user.initials,
         "is_active_member": user.is_active_member,
+        "is_staff": user.is_staff,
         "joined_on": user.joined_on.isoformat() if user.joined_on else None,
         "left_on": user.left_on.isoformat() if user.left_on else None,
     }
@@ -1073,4 +1075,42 @@ def month_toggle(request):
         "ok": True,
         "is_closed": is_closed(dt.date(year, month, 1)),
     })
+
+
+# ==============================================================================
+# Balances (/balances)
+# ==============================================================================
+
+@json_auth_required
+def balances_view(request):
+    members = list(User.objects.active_members())
+    rows = sorted(get_balance_rows(members), key=lambda r: r.net, reverse=True)
+    closed = [
+        {
+            "id": c.pk,
+            "label": str(c),
+            "closed_by": c.closed_by.name if c.closed_by else None,
+            "closed_at": c.closed_at.isoformat(),
+        }
+        for c in MonthClose.objects.select_related("closed_by")[:12]
+    ]
+    return JsonResponse({
+        "rows": [
+            {
+                "user": _serialize_user(r.user),
+                "paid": str(r.paid),
+                "owed": str(r.owed),
+                "sent": str(r.sent),
+                "received": str(r.received),
+                "net": str(r.net),
+                "magnitude": str(r.magnitude),
+                "is_owed": r.is_owed,
+                "owes": r.owes,
+                "is_settled": r.is_settled,
+            }
+            for r in rows
+        ],
+        "closed_months": closed,
+    })
+
 

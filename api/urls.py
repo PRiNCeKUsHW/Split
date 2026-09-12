@@ -47,4 +47,7 @@ urlpatterns = [
     # Summary (Flat Tab)
     path("summary", views.summary_view, name="summary_view"),
     path("month/toggle", views.month_toggle, name="month_toggle"),
+
+    # Balances
+    path("balances", views.balances_view, name="balances_view"),
 ]

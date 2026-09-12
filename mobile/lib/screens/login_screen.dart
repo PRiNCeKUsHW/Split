@@ -39,19 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _quickLogin(String username) async {
-    _usernameController.text = username;
-    _passwordController.text = 'flatsplit';
-    final appState = Provider.of<AppState>(context, listen: false);
-    final ok = await appState.login(username, 'flatsplit');
-    if (ok && mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (route) => false,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
@@ -155,59 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 isLoading: appState.isLoading,
                 backgroundColor: AppColors.action,
               ),
-              const SizedBox(height: 36),
-              Text(
-                'QUICK DEMO FLATMATES',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: isDark ? AppColors.darkMuted : AppColors.muted,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  _flatmateChip('anuj', 'Anuj (Admin)', AppColors.creditFill),
-                  _flatmateChip('priya', 'Priya', AppColors.action),
-                  _flatmateChip('rohit', 'Rohit', AppColors.infoFill),
-                  _flatmateChip('meera', 'Meera', AppColors.debitFill),
-                ],
-              ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _flatmateChip(String username, String label, Color color) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? AppColors.darkInk : AppColors.ink;
-
-    return GestureDetector(
-      onTap: () => _quickLogin(username),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: color,
-          border: Border.all(color: inkColor, width: 2.5),
-          boxShadow: [
-            BoxShadow(
-              color: inkColor,
-              offset: const Offset(3, 3),
-              blurRadius: 0,
-            ),
-          ],
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 13,
-            color: Colors.black,
           ),
         ),
       ),

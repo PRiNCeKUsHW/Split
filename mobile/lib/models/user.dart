@@ -6,6 +6,7 @@ class User {
   final String upiId;
   final String initials;
   final bool isActiveMember;
+  final bool isStaff;
   final String? joinedOn;
   final String? leftOn;
 
@@ -17,6 +18,7 @@ class User {
     required this.upiId,
     required this.initials,
     required this.isActiveMember,
+    this.isStaff = false,
     this.joinedOn,
     this.leftOn,
   });
@@ -30,6 +32,7 @@ class User {
       upiId: json['upi_id'] as String? ?? '',
       initials: json['initials'] as String? ?? '?',
       isActiveMember: json['is_active_member'] as bool? ?? true,
+      isStaff: json['is_staff'] as bool? ?? false,
       joinedOn: json['joined_on'] as String?,
       leftOn: json['left_on'] as String?,
     );
@@ -44,6 +47,7 @@ class User {
       'upi_id': upiId,
       'initials': initials,
       'is_active_member': isActiveMember,
+      'is_staff': isStaff,
       'joined_on': joinedOn,
       'left_on': leftOn,
     };

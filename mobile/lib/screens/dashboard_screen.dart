@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../theme/colors.dart';
 import '../theme/neobrutalism.dart';
+import 'away_days_screen.dart';
+import 'balances_screen.dart';
 import 'expense_detail_screen.dart';
 import 'expense_list_screen.dart';
 import 'flat_screen.dart';
+import 'members_screen.dart';
 import 'record_payment_screen.dart';
 import 'settle_screen.dart';
 
@@ -338,17 +341,22 @@ class DashboardScreen extends StatelessWidget {
             children: [
               _webQuickLink(context, 'Balances', isDark, onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const FlatScreen()),
+                  MaterialPageRoute(builder: (_) => const BalancesScreen()),
+                );
+              }),
+              _webQuickLink(context, 'Summary', isDark, onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FlatScreen(showAppBar: true)),
                 );
               }),
               _webQuickLink(context, 'Away days', isDark, onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const FlatScreen()),
+                  MaterialPageRoute(builder: (_) => const AwayDaysScreen()),
                 );
               }),
               _webQuickLink(context, 'Flatmates', isDark, onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const FlatScreen()),
+                  MaterialPageRoute(builder: (_) => const MembersScreen()),
                 );
               }),
               _webQuickLink(context, 'All Expenses', isDark, onTap: () {

@@ -10,6 +10,7 @@ import '../services/api_client.dart';
 
 class AppState extends ChangeNotifier {
   final ApiClient _client = ApiClient();
+  ApiClient get client => _client;
 
   User? _currentUser;
   bool _isLoading = false;

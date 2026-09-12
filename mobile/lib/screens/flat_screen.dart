@@ -8,7 +8,8 @@ import 'login_screen.dart';
 import 'server_config_screen.dart';
 
 class FlatScreen extends StatefulWidget {
-  const FlatScreen({super.key});
+  final bool showAppBar;
+  const FlatScreen({super.key, this.showAppBar = false});
 
   @override
   State<FlatScreen> createState() => _FlatScreenState();
@@ -134,7 +135,7 @@ class _FlatScreenState extends State<FlatScreen> {
     final byCategory = (summary?['by_category'] as List?) ?? [];
     final perPerson = (summary?['per_person'] as List?) ?? [];
 
-    return RefreshIndicator(
+    Widget content = RefreshIndicator(
       onRefresh: () async {
         _loadSummary();
         await appState.refreshAll();
@@ -667,5 +668,24 @@ class _FlatScreenState extends State<FlatScreen> {
         ],
       ),
     );
+
+    if (widget.showAppBar) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'SUMMARY',
+            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+          ),
+          elevation: 0,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(3),
+            child: Container(color: inkColor, height: 3),
+          ),
+        ),
+        body: content,
+      );
+    }
+
+    return content;
   }
 }
