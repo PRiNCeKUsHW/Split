@@ -503,6 +503,9 @@ def expense_fill_draft(request, pk: int):
         return JsonResponse({"error": "POST required"}, status=405)
 
     expense = get_object_or_404(Expense.objects.active(), pk=pk)
+    if is_closed(expense.date):
+        return JsonResponse({"error": "This month is closed and read-only."}, status=403)
+
     amount_str = None
     if request.body:
         try:

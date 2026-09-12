@@ -39,6 +39,7 @@ class _ServerConfigScreenState extends State<ServerConfigScreen> {
     final appState = Provider.of<AppState>(context, listen: false);
     final url = _urlController.text.trim();
     final success = await appState.setServerUrl(url);
+    if (!mounted) return;
 
     setState(() {
       _testing = false;
