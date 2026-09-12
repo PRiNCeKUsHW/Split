@@ -7,7 +7,6 @@ import 'away_days_screen.dart';
 import 'balances_screen.dart';
 import 'expense_detail_screen.dart';
 import 'expense_list_screen.dart';
-import 'flat_screen.dart';
 import 'members_screen.dart';
 import 'record_payment_screen.dart';
 import 'settle_screen.dart';
@@ -342,11 +341,6 @@ class DashboardScreen extends StatelessWidget {
               _webQuickLink(context, 'Balances', isDark, onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const BalancesScreen()),
-                );
-              }),
-              _webQuickLink(context, 'Summary', isDark, onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const FlatScreen(showAppBar: true)),
                 );
               }),
               _webQuickLink(context, 'Away days', isDark, onTap: () {

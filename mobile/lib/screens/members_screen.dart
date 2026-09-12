@@ -258,43 +258,6 @@ class MembersScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
         ),
         elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0, top: 10.0, bottom: 10.0),
-            child: GestureDetector(
-              onTap: () => _showAddMemberModal(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.action,
-                  border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
-                  boxShadow: [
-                    BoxShadow(
-                      color: inkColor,
-                      offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.person_add, size: 14, color: Colors.black),
-                    SizedBox(width: 4),
-                    Text(
-                      'ADD',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 11,
-                        color: Colors.black,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3),
           child: Container(color: inkColor, height: 3),

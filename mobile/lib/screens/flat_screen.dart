@@ -420,26 +420,42 @@ class _FlatScreenState extends State<FlatScreen> {
                                 ),
                         ),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AvatarChipWidget(initials: initials, size: 32, hasShadow: false),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2.0),
+                              child: AvatarChipWidget(initials: initials, size: 32, hasShadow: false),
+                            ),
                             const SizedBox(width: 10),
-                            Flexible(
-                              fit: FlexFit.loose,
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    name,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14,
-                                      color: inkColor,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                  Row(
+                                    children: [
+                                      Text(
+                                        name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 14,
+                                          color: inkColor,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Expanded(child: DottedLeaderLine()),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        formattedDiff,
+                                        style: TextStyle(
+                                          fontFamily: 'monospace',
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 15,
+                                          color: diffColor,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 3),
                                   Text(
                                     'paid ₹$paid · share ₹$share',
                                     style: TextStyle(
@@ -447,22 +463,8 @@ class _FlatScreenState extends State<FlatScreen> {
                                       fontWeight: FontWeight.w600,
                                       color: isDark ? AppColors.darkMuted : AppColors.muted,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Expanded(child: DottedLeaderLine()),
-                            const SizedBox(width: 8),
-                            Text(
-                              formattedDiff,
-                              style: TextStyle(
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 15,
-                                color: diffColor,
                               ),
                             ),
                           ],

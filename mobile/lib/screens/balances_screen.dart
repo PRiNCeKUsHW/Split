@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../providers/app_state.dart';
@@ -131,30 +131,46 @@ class _BalancesScreenState extends State<BalancesScreen> {
                                   ),
                           ),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              AvatarChipWidget(
-                                initials: initials,
-                                size: 32,
-                                hasShadow: false,
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2.0),
+                                child: AvatarChipWidget(
+                                  initials: initials,
+                                  size: 32,
+                                  hasShadow: false,
+                                ),
                               ),
                               const SizedBox(width: 10),
-                              Flexible(
-                                fit: FlexFit.loose,
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      name,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 14,
-                                        color: inkColor,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          name,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 14,
+                                            color: inkColor,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Expanded(child: DottedLeaderLine()),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '$prefix₹$magnitude',
+                                          style: TextStyle(
+                                            fontFamily: 'monospace',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800,
+                                            color: amountColor,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 3),
                                     Text(
                                       notes.join(' · '),
                                       style: TextStyle(
@@ -162,22 +178,8 @@ class _BalancesScreenState extends State<BalancesScreen> {
                                         fontWeight: FontWeight.w600,
                                         color: isDark ? AppColors.darkMuted : AppColors.muted,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Expanded(child: DottedLeaderLine()),
-                              const SizedBox(width: 8),
-                              Text(
-                                '$prefix₹$magnitude',
-                                style: TextStyle(
-                                  fontFamily: 'monospace',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                  color: amountColor,
                                 ),
                               ),
                             ],
