@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../theme/colors.dart';
 import '../theme/neobrutalism.dart';
+import 'edit_profile_screen.dart';
 import 'login_screen.dart';
 import 'server_config_screen.dart';
 
@@ -639,7 +640,19 @@ class _FlatScreenState extends State<FlatScreen> {
           ),
           const SizedBox(height: 24),
 
-          // 8. Server & Logout
+          // 8. Profile, Server & Logout
+          NeobrutalButton(
+            text: 'EDIT MY PROFILE',
+            icon: Icons.person,
+            backgroundColor: AppColors.creditFill,
+            textColor: Colors.black,
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
           NeobrutalButton(
             text: 'CONFIGURE SERVER CONNECTION',
             icon: Icons.wifi,

@@ -168,6 +168,47 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<Map<String, dynamic>> updateProfile({
+    required String displayName,
+    required String phone,
+    required String upiId,
+    String? password,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final payload = <String, dynamic>{
+        'display_name': displayName,
+        'phone': phone,
+        'upi_id': upiId,
+        if (password != null && password.isNotEmpty) 'password': password,
+      };
+
+      final res = await _client.post('/api/auth/profile', data: payload);
+      final data = json.decode(res.body);
+
+      if (res.statusCode == 200 && data['ok'] == true && data['user'] != null) {
+        _currentUser = User.fromJson(data['user']);
+        _isLoading = false;
+        notifyListeners();
+        await fetchMembers();
+        return {'ok': true};
+      } else {
+        _isLoading = false;
+        _errorMessage = data['error'] ?? 'Failed to update profile';
+        notifyListeners();
+        return {'ok': false, 'error': _errorMessage};
+      }
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = 'Network error: $e';
+      notifyListeners();
+      return {'ok': false, 'error': _errorMessage};
+    }
+  }
+
   Future<void> refreshAll() async {
     await Future.wait([
       fetchMembers(),

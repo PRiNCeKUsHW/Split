@@ -75,6 +75,7 @@ def _serialize_user(user: User | None) -> dict:
         "username": user.username,
         "name": user.name,
         "display_name": user.display_name,
+        "phone": user.phone,
         "upi_id": user.upi_id,
         "initials": user.initials,
         "is_active_member": user.is_active_member,
@@ -155,6 +156,106 @@ def auth_me(request):
         "authenticated": True,
         "user": _serialize_user(request.user),
     })
+
+
+@csrf_exempt
+@json_auth_required
+def auth_profile_update(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    data = {}
+    if request.body:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            pass
+    if not data:
+        data = request.POST
+
+    user = request.user
+    from core.services.audit import record_update, snapshot
+    before = snapshot(user)
+
+    if "display_name" in data:
+        user.display_name = (data.get("display_name") or "").strip()
+    if "phone" in data:
+        user.phone = (data.get("phone") or "").strip()
+    if "upi_id" in data:
+        user.upi_id = (data.get("upi_id") or "").strip()
+
+    password = data.get("password")
+    if password:
+        password = str(password).strip()
+        if len(password) < 6:
+            return JsonResponse({"error": "Password must be at least 6 characters."}, status=400)
+        user.set_password(password)
+
+    user.save()
+    record_update(actor=request.user, instance=user, before=before)
+
+    return JsonResponse({
+        "ok": True,
+        "user": _serialize_user(user),
+    })
+
+
+@csrf_exempt
+@json_auth_required
+def member_update(request, pk: int):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    target_user = get_object_or_404(User, pk=pk)
+    if target_user.pk != request.user.pk and not request.user.is_staff:
+        return JsonResponse({"error": "You cannot edit another flatmate's profile."}, status=403)
+
+    data = {}
+    if request.body:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            pass
+    if not data:
+        data = request.POST
+
+    from core.services.audit import record_update, snapshot
+    before = snapshot(target_user)
+
+    if "display_name" in data:
+        target_user.display_name = (data.get("display_name") or "").strip()
+    if "phone" in data:
+        target_user.phone = (data.get("phone") or "").strip()
+    if "upi_id" in data:
+        target_user.upi_id = (data.get("upi_id") or "").strip()
+
+    if request.user.is_staff:
+        if "is_active_member" in data:
+            val = data.get("is_active_member")
+            target_user.is_active_member = (val is True or val == "true" or val == "1")
+        if "joined_on" in data and data.get("joined_on"):
+            try:
+                target_user.joined_on = dt.date.fromisoformat(str(data.get("joined_on")))
+            except (ValueError, TypeError):
+                pass
+        if "left_on" in data:
+            left_val = data.get("left_on")
+            if left_val:
+                try:
+                    target_user.left_on = dt.date.fromisoformat(str(left_val))
+                except (ValueError, TypeError):
+                    pass
+            else:
+                target_user.left_on = None
+
+    target_user.save()
+    record_update(actor=request.user, instance=target_user, before=before)
+
+    return JsonResponse({
+        "ok": True,
+        "user": _serialize_user(target_user),
+    })
+
 
 
 @login_not_required

@@ -4,6 +4,7 @@ import '../providers/app_state.dart';
 import '../theme/colors.dart';
 import '../theme/neobrutalism.dart';
 import 'dashboard_screen.dart';
+import 'edit_profile_screen.dart';
 import 'expense_form_screen.dart';
 import 'expense_list_screen.dart';
 import 'flat_screen.dart';
@@ -102,6 +103,19 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  NeobrutalButton(
+                    text: 'EDIT PROFILE',
+                    icon: Icons.edit,
+                    backgroundColor: AppColors.creditFill,
+                    textColor: Colors.black,
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
                   NeobrutalButton(
                     text: 'LOGOUT',
                     icon: Icons.logout,

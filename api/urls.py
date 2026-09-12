@@ -9,8 +9,10 @@ urlpatterns = [
     path("auth/login", views.auth_login, name="login"),
     path("auth/logout", views.auth_logout, name="logout"),
     path("auth/me", views.auth_me, name="me"),
+    path("auth/profile", views.auth_profile_update, name="profile_update"),
     path("members", views.members_list, name="members"),
     path("members/create", views.member_create, name="member_create"),
+    path("members/<int:pk>/edit", views.member_update, name="member_update"),
     path("categories", views.categories_list, name="categories"),
 
     # Dashboard

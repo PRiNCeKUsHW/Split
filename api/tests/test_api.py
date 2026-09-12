@@ -197,3 +197,48 @@ def test_api_members_create(client, flatmates):
     )
     assert resp.status_code == 400
 
+
+@pytest.mark.django_db
+def test_api_profile_update(client, flatmates):
+    u1, u2 = flatmates["u1"], flatmates["u2"]
+    client.force_login(u1)
+
+    # Update own profile
+    resp = client.post(
+        reverse("api:profile_update"),
+        data=json.dumps({
+            "display_name": "Anuj Updated",
+            "phone": "9998887776",
+            "upi_id": "anuj@okhdfc",
+        }),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["ok"] is True
+    assert data["user"]["display_name"] == "Anuj Updated"
+    assert data["user"]["phone"] == "9998887776"
+    assert data["user"]["upi_id"] == "anuj@okhdfc"
+
+    u1.refresh_from_db()
+    assert u1.display_name == "Anuj Updated"
+
+    # Non-staff cannot edit another member's profile
+    resp = client.post(
+        reverse("api:member_update", args=[u2.pk]),
+        data=json.dumps({"display_name": "Hacked"}),
+        content_type="application/json",
+    )
+    assert resp.status_code == 403
+
+    # User can edit own profile via member_update
+    resp = client.post(
+        reverse("api:member_update", args=[u1.pk]),
+        data=json.dumps({"display_name": "Anuj Second"}),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+    u1.refresh_from_db()
+    assert u1.display_name == "Anuj Second"
+
+
