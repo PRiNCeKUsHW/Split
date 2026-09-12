@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state.dart';
-import 'screens/login_screen.dart';
-import 'screens/main_shell.dart';
+import 'screens/splash_screen.dart';
 import 'theme/colors.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final appState = AppState();
-  await appState.init();
 
   runApp(
     ChangeNotifierProvider.value(
@@ -67,7 +65,7 @@ class FlatSplitApp extends StatelessWidget {
       themeMode: appState.themeMode,
       theme: lightTheme,
       darkTheme: darkTheme,
-      home: appState.isAuthenticated ? const MainShell() : const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }
