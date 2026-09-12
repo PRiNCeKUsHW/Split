@@ -5,6 +5,7 @@ import '../theme/colors.dart';
 import '../theme/neobrutalism.dart';
 import 'expense_detail_screen.dart';
 import 'expense_list_screen.dart';
+import 'flat_screen.dart';
 import 'record_payment_screen.dart';
 import 'settle_screen.dart';
 
@@ -328,8 +329,68 @@ class DashboardScreen extends StatelessWidget {
                     }).toList(),
                   ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          // 7. Web Navigation Links matching web dashboard footer
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _webQuickLink(context, 'Balances', isDark, onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FlatScreen()),
+                );
+              }),
+              _webQuickLink(context, 'Away days', isDark, onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FlatScreen()),
+                );
+              }),
+              _webQuickLink(context, 'Flatmates', isDark, onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FlatScreen()),
+                );
+              }),
+              _webQuickLink(context, 'All Expenses', isDark, onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ExpenseListScreen()),
+                );
+              }),
+            ],
+          ),
+          const SizedBox(height: 28),
         ],
+      ),
+    );
+  }
+
+  Widget _webQuickLink(BuildContext context, String label, bool isDark, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : AppColors.surface,
+          border: Border.all(
+            color: isDark ? AppColors.darkInk : AppColors.ink,
+            width: AppColors.thinBorderWidth,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? AppColors.darkInk : AppColors.ink,
+              offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: isDark ? AppColors.darkInk : AppColors.ink,
+          ),
+        ),
       ),
     );
   }

@@ -52,13 +52,9 @@ class FlatScreen extends StatelessWidget {
               backgroundColor: AppColors.action,
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.black,
-                    child: Text(
-                      appState.currentUser!.initials,
-                      style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 18),
-                    ),
+                  AvatarChipWidget(
+                    initials: appState.currentUser!.initials,
+                    size: 48,
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -180,13 +176,9 @@ class FlatScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundColor: AppColors.action,
-                        child: Text(
-                          m.initials,
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.black),
-                        ),
+                      AvatarChipWidget(
+                        initials: m.initials,
+                        size: 32,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
