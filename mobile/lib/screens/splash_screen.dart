@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen>
       }
 
       // Allow a brief moment for smooth visual presentation
-      final minWait = Future.delayed(const Duration(milliseconds: 900));
+      final minWait = Future.delayed(const Duration(milliseconds: 800));
       final initTask = appState.init();
 
       await Future.wait([minWait, initTask]);
@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    // Navigate to appropriate screen
+    // Navigate to appropriate screen with smooth fade
     if (appState.isAuthenticated) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
@@ -94,12 +94,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? AppColors.darkInk : AppColors.ink;
-    final paperColor = isDark ? AppColors.darkPaper : AppColors.paper;
+    const inkColor = AppColors.ink;
+    const purpleBg = AppColors.action; // FlatSplit purple (#A78BFA)
 
     return Scaffold(
-      backgroundColor: paperColor,
+      backgroundColor: purpleBg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
@@ -113,12 +112,12 @@ class _SplashScreenState extends State<SplashScreen>
                   width: 104,
                   height: 104,
                   decoration: BoxDecoration(
-                    color: AppColors.action,
+                    color: AppColors.creditFill, // Electric Lime #BEF264
                     border: Border.all(color: inkColor, width: AppColors.borderWidth),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: inkColor,
-                        offset: const Offset(
+                        offset: Offset(
                           AppColors.largeShadowOffset,
                           AppColors.largeShadowOffset,
                         ),
@@ -126,33 +125,16 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ],
                   ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Inner Lime badge
-                      Container(
-                        width: 76,
-                        height: 76,
-                        decoration: BoxDecoration(
-                          color: AppColors.creditFill,
-                          border: Border.all(
-                            color: inkColor,
-                            width: AppColors.thinBorderWidth,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '₹',
-                            style: TextStyle(
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.w900,
-                              fontSize: 48,
-                              color: inkColor,
-                            ),
-                          ),
-                        ),
+                  child: const Center(
+                    child: Text(
+                      '₹',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w900,
+                        fontSize: 54,
+                        color: inkColor,
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -160,31 +142,31 @@ class _SplashScreenState extends State<SplashScreen>
               const SizedBox(height: 28),
 
               // App Title
-              Text(
+              const Text(
                 'FLATSPLIT',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
-                  fontSize: 32,
+                  fontSize: 34,
                   letterSpacing: 2.0,
                   color: inkColor,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
               // Tagline
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.surface,
+                  color: Colors.white,
                   border: Border.all(
                     color: inkColor,
                     width: AppColors.thinBorderWidth,
                   ),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: inkColor,
-                      offset: const Offset(
+                      offset: Offset(
                         AppColors.smallShadowOffset,
                         AppColors.smallShadowOffset,
                       ),
@@ -192,7 +174,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ],
                 ),
-                child: Text(
+                child: const Text(
                   'SHARED LIVING • LOCAL FIRST',
                   style: TextStyle(
                     fontFamily: 'monospace',
@@ -211,12 +193,12 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 220,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  color: Colors.white,
                   border: Border.all(color: inkColor, width: 2.5),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: inkColor,
-                      offset: const Offset(2.5, 2.5),
+                      offset: Offset(2.5, 2.5),
                       blurRadius: 0,
                     ),
                   ],
@@ -228,7 +210,7 @@ class _SplashScreenState extends State<SplashScreen>
                       alignment: Alignment.centerLeft,
                       widthFactor: 0.25 + (_animController.value * 0.70),
                       child: Container(
-                        color: AppColors.action,
+                        color: AppColors.creditFill,
                       ),
                     );
                   },
@@ -240,10 +222,10 @@ class _SplashScreenState extends State<SplashScreen>
               // Status message
               Text(
                 _status,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
                   fontSize: 13,
-                  color: isDark ? AppColors.darkMuted : AppColors.muted,
+                  color: inkColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -252,10 +234,11 @@ class _SplashScreenState extends State<SplashScreen>
               if (_showTroubleshooting) ...[
                 const SizedBox(height: 24),
                 NeobrutalCard(
+                  backgroundColor: Colors.white,
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
-                      Text(
+                      const Text(
                         'SERVER UNREACHABLE?',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
@@ -285,7 +268,7 @@ class _SplashScreenState extends State<SplashScreen>
                             child: NeobrutalButton(
                               text: 'RETRY',
                               height: 38,
-                              backgroundColor: AppColors.action,
+                              backgroundColor: AppColors.creditFill,
                               onPressed: () {
                                 setState(() {
                                   _status = 'Retrying connection...';
@@ -308,11 +291,9 @@ class _SplashScreenState extends State<SplashScreen>
                 'v2.0 • OFFLINE READY • ZERO DRIFT',
                 style: TextStyle(
                   fontFamily: 'monospace',
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   fontSize: 11,
-                  color: isDark
-                      ? AppColors.darkMuted.withValues(alpha: 0.6)
-                      : AppColors.muted.withValues(alpha: 0.6),
+                  color: inkColor.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 8),
