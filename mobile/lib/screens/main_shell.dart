@@ -281,8 +281,8 @@ class _MainShellState extends State<MainShell> {
             ),
             // Floating Raised Square FAB in the center
             Positioned(
-              top: -20,
-              left: MediaQuery.of(context).size.width / 2 - 26,
+              top: -22,
+              left: MediaQuery.of(context).size.width / 2 - 25,
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
@@ -290,8 +290,8 @@ class _MainShellState extends State<MainShell> {
                   );
                 },
                 child: Container(
-                  width: 52,
-                  height: 52,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: AppColors.action,
                     border: Border.all(color: Colors.black, width: AppColors.borderWidth),
@@ -304,7 +304,7 @@ class _MainShellState extends State<MainShell> {
                     ],
                   ),
                   child: const Center(
-                    child: Icon(Icons.add, color: Colors.black, size: 30),
+                    child: Icon(Icons.add, color: Colors.black, size: 28),
                   ),
                 ),
               ),

@@ -55,7 +55,19 @@ def json_auth_required(view_func):
     return _wrapped
 
 
-def _serialize_user(user: User) -> dict:
+def _serialize_user(user: User | None) -> dict:
+    if not user:
+        return {
+            "id": 0,
+            "username": "",
+            "name": "Flatmate",
+            "display_name": "Flatmate",
+            "upi_id": "",
+            "initials": "?",
+            "is_active_member": False,
+            "joined_on": None,
+            "left_on": None,
+        }
     return {
         "id": user.pk,
         "username": user.username,

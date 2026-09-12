@@ -279,6 +279,22 @@ class AppState extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> updateExpense(int id, Map<String, dynamic> data) async {
+    try {
+      final res = await _client.post('/api/expenses/$id/edit', data: data);
+      if (res.statusCode == 200) {
+        await refreshAll();
+        return true;
+      }
+      final err = json.decode(res.body);
+      _errorMessage = err['error'] ?? 'Failed to update expense';
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+    notifyListeners();
+    return false;
+  }
+
   Future<bool> deleteExpense(int id) async {
     try {
       final res = await _client.post('/api/expenses/$id/delete');

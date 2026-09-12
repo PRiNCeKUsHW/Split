@@ -4,6 +4,7 @@ import '../models/expense.dart';
 import '../providers/app_state.dart';
 import '../theme/colors.dart';
 import '../theme/neobrutalism.dart';
+import 'expense_form_screen.dart';
 
 class ExpenseDetailScreen extends StatefulWidget {
   final int expenseId;
@@ -17,6 +18,7 @@ class ExpenseDetailScreen extends StatefulWidget {
 class _ExpenseDetailScreenState extends State<ExpenseDetailScreen> {
   Expense? _expense;
   bool _isLoading = true;
+  bool _isPostingComment = false;
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _draftAmountController = TextEditingController();
 
@@ -37,21 +39,27 @@ class _ExpenseDetailScreenState extends State<ExpenseDetailScreen> {
     setState(() => _isLoading = true);
     final appState = Provider.of<AppState>(context, listen: false);
     final exp = await appState.getExpenseDetail(widget.expenseId);
-    setState(() {
-      _expense = exp;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _expense = exp;
+        _isLoading = false;
+      });
+    }
   }
 
   void _postComment() async {
     final text = _commentController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isPostingComment) return;
 
+    setState(() => _isPostingComment = true);
     final appState = Provider.of<AppState>(context, listen: false);
     final ok = await appState.addComment(widget.expenseId, text);
-    if (ok) {
-      _commentController.clear();
-      _loadDetail();
+    if (mounted) {
+      setState(() => _isPostingComment = false);
+      if (ok) {
+        _commentController.clear();
+        _loadDetail();
+      }
     }
   }
 
@@ -68,20 +76,39 @@ class _ExpenseDetailScreenState extends State<ExpenseDetailScreen> {
   }
 
   void _confirmDelete() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inkColor = isDark ? AppColors.darkInk : AppColors.ink;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-        title: const Text('DELETE EXPENSE', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text('Are you sure you want to remove this expense?'),
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: inkColor, width: AppColors.borderWidth),
+          borderRadius: BorderRadius.zero,
+        ),
+        title: Text(
+          'DELETE EXPENSE',
+          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: inkColor),
+        ),
+        content: Text(
+          'Delete this expense? It stays in the history.',
+          style: TextStyle(color: inkColor, fontSize: 14),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('CANCEL'),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(fontWeight: FontWeight.w800, color: inkColor),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('DELETE', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'DELETE',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),
@@ -119,9 +146,11 @@ class _ExpenseDetailScreenState extends State<ExpenseDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'EXPENSE DETAILS',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+        title: Text(
+          exp.description.toUpperCase(),
+          style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5, fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         elevation: 0,
         actions: [
@@ -139,265 +168,537 @@ class _ExpenseDetailScreenState extends State<ExpenseDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // 1. Main Header Card
+          // 1. Main Header Card (card-flat)
           NeobrutalCard(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    NeobrutalBadge(
-                      label: exp.category.name.toUpperCase(),
-                      backgroundColor: exp.category.color,
-                      textColor: Colors.white,
-                    ),
-                    NeobrutalBadge(
-                      label: exp.splitTypeLabel ?? exp.splitType,
-                      backgroundColor: AppColors.action,
-                    ),
-                  ],
+                // Eyebrow
+                Text(
+                  exp.category.name.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                    color: isDark ? AppColors.darkMuted : AppColors.muted,
+                  ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 6),
+                // Title
                 Text(
                   exp.description,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: inkColor,
                   ),
                 ),
                 const SizedBox(height: 10),
+                // Money hero
                 if (exp.amount != null)
-                  MoneyText(
-                    amount: exp.amount!,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
+                  Text(
+                    '₹${exp.amount}',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -1.0,
+                      color: inkColor,
+                    ),
                   )
                 else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const NeobrutalBadge(
-                        label: 'VARIABLE DRAFT: NO AMOUNT ENTERED',
-                        backgroundColor: AppColors.infoFill,
-                      ),
-                      const SizedBox(height: 10),
-                      NeobrutalButton(
-                        text: 'FILL AMOUNT IN',
-                        backgroundColor: AppColors.action,
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                              title: const Text('ENTER AMOUNT', style: TextStyle(fontWeight: FontWeight.w900)),
-                              content: TextField(
-                                controller: _draftAmountController,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                decoration: const InputDecoration(hintText: 'e.g. 1250.00'),
-                              ),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('CANCEL')),
-                                TextButton(onPressed: _fillDraft, child: const Text('SAVE', style: TextStyle(fontWeight: FontWeight.bold))),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                const SizedBox(height: 12),
-                const Divider(thickness: 2),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.person, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Paid by ${exp.paidBy.name}',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.calendar_today, size: 14),
-                    const SizedBox(width: 6),
-                    Text(
-                      exp.date,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                    ),
-                  ],
-                ),
-                if (exp.periodStart != null && exp.periodEnd != null) ...[
-                  const SizedBox(height: 6),
                   Text(
-                    'Period: ${exp.periodStart} to ${exp.periodEnd} (${exp.periodDays} days)',
+                    '—',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
+                      color: inkColor,
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                // Paid by & date
+                Text(
+                  '${exp.paidBy.name} paid · ${exp.date}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.darkMuted : AppColors.muted,
+                  ),
+                ),
+                if (exp.periodDays != null && exp.periodDays! > 1) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Covers ${exp.periodStart ?? ''} – ${exp.periodEnd ?? ''} (${exp.periodDays} days)',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? AppColors.darkMuted : AppColors.muted,
                       fontWeight: FontWeight.w600,
+                      color: isDark ? AppColors.darkMuted : AppColors.muted,
+                    ),
+                  ),
+                ],
+                // Calculation Notes (as seen on web)
+                if (exp.notes != null && exp.notes!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkPaper : AppColors.paper,
+                      border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
+                    ),
+                    child: Text(
+                      exp.notes!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: inkColor,
+                        height: 1.45,
+                      ),
+                    ),
+                  ),
+                ],
+                // Draft amount prompt
+                if (exp.isDraft) ...[
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.action.withValues(alpha: 0.2),
+                      border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Variable Draft: No amount entered',
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Colors.black),
+                        ),
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(color: inkColor, width: AppColors.borderWidth),
+                                  borderRadius: BorderRadius.zero,
+                                ),
+                                title: Text(
+                                  'ENTER AMOUNT',
+                                  style: TextStyle(fontWeight: FontWeight.w900, color: inkColor),
+                                ),
+                                content: TextField(
+                                  controller: _draftAmountController,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  decoration: InputDecoration(
+                                    hintText: 'e.g. 1250.00',
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(color: inkColor, width: 2),
+                                      borderRadius: BorderRadius.zero,
+                                    ),
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(ctx).pop(),
+                                    child: Text('CANCEL', style: TextStyle(color: inkColor)),
+                                  ),
+                                  TextButton(
+                                    onPressed: _fillDraft,
+                                    child: const Text('SAVE', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.action,
+                              border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: inkColor,
+                                  offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
+                                  blurRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: const Text(
+                              'FILL AMOUNT IN',
+                              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Colors.black),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ],
             ),
           ),
+
+          if (exp.isMonthClosed) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade100,
+                border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
+              ),
+              child: Text(
+                '${exp.date} is closed, so this expense is read-only.',
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.black),
+              ),
+            ),
+          ],
+
           const SizedBox(height: 20),
 
-          // 2. Shares Breakdown
-          Text(
-            'SPLIT BREAKDOWN',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.8,
-              color: isDark ? AppColors.darkMuted : AppColors.muted,
+          // 2. The Split Section
+          if (exp.shares.isNotEmpty) ...[
+            Text(
+              'THE SPLIT',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+                color: inkColor,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          NeobrutalCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Column(
-              children: exp.shares.map((share) {
-                final user = share.user;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundColor: AppColors.action,
-                        child: Text(
-                          user?.initials ?? '?',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.black,
+            const SizedBox(height: 8),
+            NeobrutalCard(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: Column(
+                children: [
+                  ...exp.shares.map((share) {
+                    final user = share.user;
+                    final initials = user?.initials ?? (share.userName != null && share.userName!.isNotEmpty ? share.userName![0] : '?');
+                    final name = user?.name ?? share.userName ?? 'Flatmate';
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: inkColor,
+                            width: AppColors.thinBorderWidth,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user?.name ?? 'Flatmate',
-                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                      child: Row(
+                        children: [
+                          AvatarChipWidget(
+                            initials: initials,
+                            size: 32,
+                            hasShadow: false,
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 14,
+                                    color: inkColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (share.basis.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    share.basis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? AppColors.darkMuted : AppColors.muted,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ],
                             ),
-                            if (share.basis.isNotEmpty)
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: DottedLeaderLine(),
+                          ),
+                          const SizedBox(width: 8),
+                          MoneyText(
+                            amount: share.amountOwed,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: inkColor,
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  // Total Row
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Total',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                            color: inkColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: DottedLeaderLine(),
+                        ),
+                        const SizedBox(width: 8),
+                        MoneyText(
+                          amount: exp.amount ?? '0.00',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: inkColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // 3. Comments Section
+          Text(
+            'COMMENTS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
+              color: inkColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          NeobrutalCard(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Comments list
+                if (exp.comments.isNotEmpty) ...[
+                  ...exp.comments.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final c = entry.value;
+                    final isLast = idx == exp.comments.length - 1;
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      decoration: BoxDecoration(
+                        border: isLast
+                            ? null
+                            : Border(
+                                bottom: BorderSide(
+                                  color: inkColor,
+                                  width: AppColors.thinBorderWidth,
+                                ),
+                              ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              AvatarChipWidget(
+                                initials: c.author.initials,
+                                size: 26,
+                                hasShadow: false,
+                              ),
+                              const SizedBox(width: 8),
                               Text(
-                                share.basis,
+                                c.author.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                  color: inkColor,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                c.createdAt.split('T')[0],
                                 style: TextStyle(
                                   fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                   color: isDark ? AppColors.darkMuted : AppColors.muted,
                                 ),
                               ),
-                          ],
-                        ),
-                      ),
-                      MoneyText(
-                        amount: share.amountOwed,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // 3. Comments Thread
-          Text(
-            'COMMENTS (${exp.comments.length})',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.8,
-              color: isDark ? AppColors.darkMuted : AppColors.muted,
-            ),
-          ),
-          const SizedBox(height: 10),
-          if (exp.comments.isEmpty)
-            NeobrutalCard(
-              child: Text(
-                'No comments yet.',
-                style: TextStyle(
-                  color: isDark ? AppColors.darkMuted : AppColors.muted,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            )
-          else
-            ...exp.comments.map((c) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: NeobrutalCard(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            c.author.name,
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                            ],
                           ),
+                          const SizedBox(height: 6),
                           Text(
-                            c.createdAt.split('T')[0],
+                            c.body,
                             style: TextStyle(
-                              fontSize: 11,
-                              color: isDark ? AppColors.darkMuted : AppColors.muted,
+                              fontSize: 13,
+                              color: inkColor,
+                              height: 1.4,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(c.body, style: const TextStyle(fontSize: 13)),
-                    ],
+                    );
+                  }),
+                  const SizedBox(height: 14),
+                  Divider(color: inkColor, thickness: AppColors.thinBorderWidth),
+                  const SizedBox(height: 10),
+                ],
+
+                // Comment input form
+                Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkPaper : AppColors.paper,
+                    border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
+                  ),
+                  child: TextField(
+                    controller: _commentController,
+                    maxLines: 3,
+                    minLines: 2,
+                    style: TextStyle(fontSize: 13, color: inkColor),
+                    decoration: InputDecoration(
+                      hintText: 'Write a comment...',
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? AppColors.darkMuted : AppColors.muted,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.all(10),
+                    ),
                   ),
                 ),
-              );
-            }),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: NeobrutalTextField(
-                  controller: _commentController,
-                  label: '',
-                  hint: 'Write a comment...',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: GestureDetector(
-                  onTap: _postComment,
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: _isPostingComment ? null : _postComment,
                   child: Container(
-                    height: 50,
-                    width: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.action,
-                      border: Border.all(color: inkColor, width: AppColors.borderWidth),
+                      color: isDark ? AppColors.darkPaper : Colors.white,
+                      border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
                       boxShadow: [
                         BoxShadow(
                           color: inkColor,
-                          offset: const Offset(3, 3),
+                          offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
                           blurRadius: 0,
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.send, color: Colors.black, size: 20),
+                    child: _isPostingComment
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                          )
+                        : Text(
+                            'Post comment',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12,
+                              color: inkColor,
+                            ),
+                          ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+
+          const SizedBox(height: 24),
+
+          // 4. Action Buttons (Edit & Delete)
+          if (!exp.isMonthClosed) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ExpenseFormScreen(initialExpense: exp),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkSurface : AppColors.surface,
+                        border: Border.all(color: inkColor, width: AppColors.borderWidth),
+                        boxShadow: [
+                          BoxShadow(
+                            color: inkColor,
+                            offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
+                            blurRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          'EDIT',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13,
+                            letterSpacing: 0.5,
+                            color: inkColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _confirmDelete,
+                    child: Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.debitFill,
+                        border: Border.all(color: inkColor, width: AppColors.borderWidth),
+                        boxShadow: [
+                          BoxShadow(
+                            color: inkColor,
+                            offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
+                            blurRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'DELETE',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13,
+                            letterSpacing: 0.5,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+          ],
         ],
       ),
     );
   }
 }
+

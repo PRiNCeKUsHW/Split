@@ -360,12 +360,14 @@ class AvatarChipWidget extends StatelessWidget {
   final String initials;
   final VoidCallback? onTap;
   final double size;
+  final bool hasShadow;
 
   const AvatarChipWidget({
     super.key,
     required this.initials,
     this.onTap,
     this.size = 38.0,
+    this.hasShadow = true,
   });
 
   @override
@@ -379,13 +381,15 @@ class AvatarChipWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.surface,
         border: Border.all(color: inkColor, width: AppColors.thinBorderWidth),
-        boxShadow: [
-          BoxShadow(
-            color: inkColor,
-            offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
-            blurRadius: 0,
-          ),
-        ],
+        boxShadow: hasShadow
+            ? [
+                BoxShadow(
+                  color: inkColor,
+                  offset: const Offset(AppColors.smallShadowOffset, AppColors.smallShadowOffset),
+                  blurRadius: 0,
+                ),
+              ]
+            : null,
       ),
       child: Center(
         child: Text(
@@ -413,15 +417,16 @@ class DottedLeaderLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = (isDark ? AppColors.darkInk : AppColors.ink).withValues(alpha: 0.35);
+    final inkColor = (isDark ? AppColors.darkInk : AppColors.ink).withValues(alpha: 0.4);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final boxWidth = constraints.constrainWidth();
+        final boxWidth = constraints.maxWidth;
         if (boxWidth < 12) return const SizedBox.shrink();
-        const dotSize = 3.0;
+        const dotSize = 2.0;
         const gap = 4.0;
         final count = (boxWidth / (dotSize + gap)).floor();
+        if (count <= 0) return const SizedBox.shrink();
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(count, (_) {
@@ -442,6 +447,7 @@ class NeobrutalLedgerRow extends StatelessWidget {
   final String title;
   final String? subtitle;
   final String? amount;
+  final String? subamount;
   final Color? amountColor;
   final Widget? trailing;
   final VoidCallback? onTap;
@@ -453,6 +459,7 @@ class NeobrutalLedgerRow extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.amount,
+    this.subamount,
     this.amountColor,
     this.trailing,
     this.onTap,
@@ -465,7 +472,7 @@ class NeobrutalLedgerRow extends StatelessWidget {
     final inkColor = isDark ? AppColors.darkInk : AppColors.ink;
 
     Widget content = Container(
-      padding: const EdgeInsets.symmetric(vertical: 11.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       decoration: BoxDecoration(
         border: showBottomBorder
             ? Border(
@@ -483,7 +490,8 @@ class NeobrutalLedgerRow extends StatelessWidget {
             leading!,
             const SizedBox(width: 10),
           ],
-          Expanded(
+          Flexible(
+            fit: FlexFit.loose,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -492,7 +500,7 @@ class NeobrutalLedgerRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    fontSize: 15,
+                    fontSize: 14,
                     color: isDark ? AppColors.darkInk : AppColors.ink,
                   ),
                   maxLines: 1,
@@ -516,19 +524,33 @@ class NeobrutalLedgerRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           const Expanded(
-            flex: 0,
-            child: SizedBox(
-              width: 32,
-              child: DottedLeaderLine(),
-            ),
+            child: DottedLeaderLine(),
           ),
           const SizedBox(width: 8),
           if (amount != null)
-            MoneyText(
-              amount: amount!,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: amountColor ?? (isDark ? AppColors.darkInk : AppColors.ink),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                MoneyText(
+                  amount: amount!,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: amountColor ?? (isDark ? AppColors.darkInk : AppColors.ink),
+                ),
+                if (subamount != null && subamount!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subamount!,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? AppColors.darkMuted : AppColors.muted,
+                    ),
+                  ),
+                ],
+              ],
             ),
           if (trailing != null) ...[
             const SizedBox(width: 8),

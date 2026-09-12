@@ -9,7 +9,9 @@ import '../theme/colors.dart';
 import '../theme/neobrutalism.dart';
 
 class ExpenseFormScreen extends StatefulWidget {
-  const ExpenseFormScreen({super.key});
+  final Expense? initialExpense;
+
+  const ExpenseFormScreen({super.key, this.initialExpense});
 
   @override
   State<ExpenseFormScreen> createState() => _ExpenseFormScreenState();
@@ -49,6 +51,37 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       _selectedParticipants.add(m.id);
       _customInputs[m.id] = TextEditingController();
     }
+
+    if (widget.initialExpense != null) {
+      final exp = widget.initialExpense!;
+      _descController.text = exp.description;
+      if (exp.amount != null) _amountController.text = exp.amount!;
+      if (exp.notes != null) _notesController.text = exp.notes!;
+      _selectedCategory = exp.category;
+      _paidBy = exp.paidBy;
+      try {
+        _date = DateTime.parse(exp.date);
+      } catch (_) {}
+      if (exp.periodStart != null && exp.periodEnd != null) {
+        _hasPeriod = true;
+        try {
+          _periodStart = DateTime.parse(exp.periodStart!);
+          _periodEnd = DateTime.parse(exp.periodEnd!);
+        } catch (_) {}
+      }
+      _splitType = exp.splitType;
+      _selectedParticipants.clear();
+      for (var s in exp.shares) {
+        final uid = s.userId ?? s.user?.id;
+        if (uid != null) {
+          _selectedParticipants.add(uid);
+          if (s.basis.isNotEmpty) {
+            _customInputs[uid]?.text = s.basis;
+          }
+        }
+      }
+    }
+
     _amountController.addListener(_updatePreview);
     _descController.addListener(() => setState(() {}));
   }
@@ -148,7 +181,9 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       if (_splitType == 'SHARES') payload['units_$uid'] = val;
     }
 
-    final ok = await appState.createExpense(payload);
+    final ok = widget.initialExpense != null
+        ? await appState.updateExpense(widget.initialExpense!.id, payload)
+        : await appState.createExpense(payload);
     setState(() => _isSubmitting = false);
 
     if (ok && mounted) {
@@ -166,9 +201,9 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'ADD EXPENSE',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+        title: Text(
+          widget.initialExpense != null ? 'EDIT EXPENSE' : 'ADD EXPENSE',
+          style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
         ),
         elevation: 0,
         bottom: PreferredSize(
