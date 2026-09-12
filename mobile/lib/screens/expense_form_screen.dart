@@ -46,7 +46,14 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     if (appState.categories.isNotEmpty) {
       _selectedCategory = appState.categories.first;
     }
-    _paidBy = appState.currentUser;
+    if (appState.members.isNotEmpty) {
+      _paidBy = appState.members.firstWhere(
+        (m) => m.id == appState.currentUser?.id,
+        orElse: () => appState.members.first,
+      );
+    } else {
+      _paidBy = appState.currentUser;
+    }
     for (var m in appState.members) {
       _selectedParticipants.add(m.id);
       _customInputs[m.id] = TextEditingController();
@@ -311,7 +318,9 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<User>(
-                            value: _paidBy,
+                            value: appState.members.contains(_paidBy)
+                                ? _paidBy
+                                : (appState.members.isNotEmpty ? appState.members.first : null),
                             isExpanded: true,
                             items: appState.members.map((u) {
                               return DropdownMenuItem(value: u, child: Text(u.name));

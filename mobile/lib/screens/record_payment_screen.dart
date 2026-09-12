@@ -144,7 +144,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> {
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<User>(
-                  value: _recipient,
+                  value: otherMembers.contains(_recipient) ? _recipient : null,
                   hint: const Text('Select flatmate to pay'),
                   isExpanded: true,
                   items: otherMembers.map((u) {
