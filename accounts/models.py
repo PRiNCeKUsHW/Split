@@ -19,6 +19,8 @@ class FlatmateManager(UserManager):
             Q(left_on__isnull=True) | Q(left_on__gte=today),
         ).order_by("id")
 
+    active = active_members
+
     def members_on(self, day: dt.date) -> models.QuerySet["User"]:
         """Everyone whose tenancy covers ``day`` -- used by prorated splits."""
         return self.filter(
