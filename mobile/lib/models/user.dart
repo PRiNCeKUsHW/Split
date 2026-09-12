@@ -1,0 +1,51 @@
+class User {
+  final int id;
+  final String username;
+  final String name;
+  final String displayName;
+  final String upiId;
+  final String initials;
+  final bool isActiveMember;
+  final String? joinedOn;
+  final String? leftOn;
+
+  User({
+    required this.id,
+    required this.username,
+    required this.name,
+    required this.displayName,
+    required this.upiId,
+    required this.initials,
+    required this.isActiveMember,
+    this.joinedOn,
+    this.leftOn,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] as int,
+      username: json['username'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      displayName: json['display_name'] as String? ?? '',
+      upiId: json['upi_id'] as String? ?? '',
+      initials: json['initials'] as String? ?? '?',
+      isActiveMember: json['is_active_member'] as bool? ?? true,
+      joinedOn: json['joined_on'] as String?,
+      leftOn: json['left_on'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'name': name,
+      'display_name': displayName,
+      'upi_id': upiId,
+      'initials': initials,
+      'is_active_member': isActiveMember,
+      'joined_on': joinedOn,
+      'left_on': leftOn,
+    };
+  }
+}

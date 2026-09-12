@@ -14,6 +14,7 @@ urlpatterns = [
     path("expenses/", include("expenses.urls")),
     path("settle/", include("settlements.urls")),
     path("recurring/", include("recurring.urls")),
+    path("api/", include("api.urls")),
     # A service worker only controls pages at or below its own URL, so this
     # must be served from the root -- /static/sw.js would scope it to /static/.
     path("sw.js", service_worker, name="sw"),
