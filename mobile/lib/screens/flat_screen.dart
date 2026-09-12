@@ -533,9 +533,9 @@ class _FlatScreenState extends State<FlatScreen> {
           NeobrutalCard(
             backgroundColor: AppColors.infoFill.withValues(alpha: 0.3),
             padding: const EdgeInsets.all(12),
-            child: const Text(
+            child: Text(
               'Both dates count (5th–8th = 4 days). Away days only discount categories flagged "prorate by away days" (food, maid, gas). Rent is never reduced by travel.',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, height: 1.4),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, height: 1.4, color: inkColor),
             ),
           ),
           const SizedBox(height: 8),
@@ -566,7 +566,7 @@ class _FlatScreenState extends State<FlatScreen> {
                         children: [
                           Text(
                             user != null ? user['name'] : 'Flatmate',
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: inkColor),
                           ),
                           Text(
                             '${p['start_date']} to ${p['end_date']} (${p['days_count']} days)',

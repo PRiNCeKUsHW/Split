@@ -1144,7 +1144,7 @@ def summary_view(request):
         year, month = today.year, today.month
 
     expenses = Expense.objects.countable().for_month(year, month)
-    members = list(User.objects.active())
+    members = list(User.objects.active_members())
 
     by_category = list(
         expenses.values("category__name", "category__color")
