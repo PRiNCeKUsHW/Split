@@ -158,3 +158,42 @@ def test_api_settlements(client, flatmates):
     # Confirm settlement status in DB
     settle = Settlement.objects.get(pk=settle_id)
     assert settle.status == Settlement.Status.CONFIRMED
+
+
+@pytest.mark.django_db
+def test_api_members_create(client, flatmates):
+    u1 = flatmates["u1"]
+    client.force_login(u1)
+
+    # Missing username
+    resp = client.post(reverse("api:member_create"), data=json.dumps({"display_name": "Test"}), content_type="application/json")
+    assert resp.status_code == 400
+
+    # Successful creation
+    resp = client.post(
+        reverse("api:member_create"),
+        data=json.dumps({
+            "username": "vikram",
+            "display_name": "Vikram Seth",
+            "upi_id": "vikram@upi",
+            "phone": "9876543210",
+        }),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["ok"] is True
+    assert data["member"]["username"] == "vikram"
+    assert "invite_link" in data
+
+    # Duplicate username check
+    resp = client.post(
+        reverse("api:member_create"),
+        data=json.dumps({
+            "username": "vikram",
+            "display_name": "Vikram 2",
+        }),
+        content_type="application/json",
+    )
+    assert resp.status_code == 400
+

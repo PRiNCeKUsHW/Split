@@ -359,11 +359,6 @@ class DashboardScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const MembersScreen()),
                 );
               }),
-              _webQuickLink(context, 'All Expenses', isDark, onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ExpenseListScreen()),
-                );
-              }),
             ],
           ),
           const SizedBox(height: 28),

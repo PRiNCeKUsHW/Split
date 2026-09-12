@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 from accounts.models import AwayPeriod
+from accounts.services import build_invite_link, create_flatmate
 from core.models import AuditLog, MonthClose
 from core.services.audit import record_create, record_update
 from core.services.monthclose import assert_open, close_month, is_closed, reopen_month
@@ -161,6 +162,60 @@ def members_list(request):
     members = list(User.objects.active_members())
     return JsonResponse({
         "members": [_serialize_user(m) for m in members]
+    })
+
+
+@csrf_exempt
+@json_auth_required
+def member_create(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    data = {}
+    if request.body:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            pass
+    if not data:
+        data = request.POST
+
+    username = (data.get("username") or "").strip().lower()
+    display_name = (data.get("display_name") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    upi_id = (data.get("upi_id") or "").strip()
+    password = data.get("password")
+
+    if not username:
+        return JsonResponse({"error": "Username is required."}, status=400)
+    if not display_name:
+        return JsonResponse({"error": "Name is required."}, status=400)
+
+    import re
+    if not re.match(r"^[a-zA-Z0-9_-]+$", username):
+        return JsonResponse({"error": "Username can only contain letters, numbers, hyphens, and underscores."}, status=400)
+
+    if User.objects.filter(username__iexact=username).exists():
+        return JsonResponse({"error": f"A flatmate with username '{username}' already exists."}, status=400)
+
+    try:
+        user = create_flatmate(
+            username=username,
+            display_name=display_name,
+            phone=phone,
+            upi_id=upi_id,
+        )
+        if password:
+            user.set_password(password)
+            user.save(update_fields=["password"])
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+    invite_link = build_invite_link(user, request)
+    return JsonResponse({
+        "ok": True,
+        "member": _serialize_user(user),
+        "invite_link": invite_link,
     })
 
 

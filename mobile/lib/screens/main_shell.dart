@@ -35,84 +35,91 @@ class _MainShellState extends State<MainShell> {
 
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.all(24.0),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: inkColor, width: AppColors.borderWidth)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        final bottomPadding = MediaQuery.of(ctx).padding.bottom;
+        return SafeArea(
+          bottom: true,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 24.0 + (bottomPadding > 0 ? bottomPadding : 12.0)),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: inkColor, width: AppColors.borderWidth)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AvatarChipWidget(
-                    initials: user?.initials ?? '?',
-                    size: 48,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?.name ?? 'Flatmate',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: isDark ? AppColors.darkInk : AppColors.ink,
-                          ),
+                  Row(
+                    children: [
+                      AvatarChipWidget(
+                        initials: user?.initials ?? '?',
+                        size: 48,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.name ?? 'Flatmate',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: isDark ? AppColors.darkInk : AppColors.ink,
+                              ),
+                            ),
+                            Text(
+                              '@${user?.username ?? ''}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? AppColors.darkMuted : AppColors.muted,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '@${user?.username ?? ''}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? AppColors.darkMuted : AppColors.muted,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  NeobrutalCard(
+                    backgroundColor: AppColors.infoFill,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.apartment, size: 20, color: Colors.black),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Flat: ${appState.flatName}',
+                            style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.black, fontSize: 13),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  NeobrutalButton(
+                    text: 'LOGOUT',
+                    icon: Icons.logout,
+                    backgroundColor: AppColors.debitFill,
+                    textColor: Colors.black,
+                    onPressed: () async {
+                      await appState.logout();
+                      if (context.mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          (route) => false,
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
-              const SizedBox(height: 20),
-              NeobrutalCard(
-                backgroundColor: AppColors.infoFill,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                child: Row(
-                  children: [
-                    const Icon(Icons.apartment, size: 20, color: Colors.black),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Flat: ${appState.flatName}',
-                        style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.black, fontSize: 13),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              NeobrutalButton(
-                text: 'LOGOUT',
-                icon: Icons.logout,
-                backgroundColor: AppColors.debitFill,
-                textColor: Colors.black,
-                onPressed: () async {
-                  await appState.logout();
-                  if (context.mounted) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  }
-                },
-              ),
-            ],
+            ),
           ),
         );
       },

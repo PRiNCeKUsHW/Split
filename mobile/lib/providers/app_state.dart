@@ -193,6 +193,41 @@ class AppState extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<Map<String, dynamic>?> createMember({
+    required String username,
+    required String displayName,
+    String? password,
+    String? phone,
+    String? upiId,
+  }) async {
+    try {
+      final payload = <String, dynamic>{
+        'username': username,
+        'display_name': displayName,
+      };
+      if (password != null && password.trim().isNotEmpty) {
+        payload['password'] = password.trim();
+      }
+      if (phone != null && phone.trim().isNotEmpty) {
+        payload['phone'] = phone.trim();
+      }
+      if (upiId != null && upiId.trim().isNotEmpty) {
+        payload['upi_id'] = upiId.trim();
+      }
+
+      final res = await _client.post('/api/members/create', data: payload);
+      if (res.statusCode == 200) {
+        await fetchMembers();
+        return json.decode(res.body) as Map<String, dynamic>;
+      } else {
+        final data = json.decode(res.body);
+        return {'error': data['error'] ?? 'Failed to add flatmate'};
+      }
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
+
   Future<void> fetchCategories() async {
     try {
       final res = await _client.get('/api/categories');
