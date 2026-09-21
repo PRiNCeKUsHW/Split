@@ -15,9 +15,17 @@ STORAGES = {
 
 # Django needs scheme-qualified origins for CSRF. Every detected LAN address
 # gets one, so a phone POSTing to http://192.168.1.5:8000 is accepted.
+# Also trust Cloudflare Tunnel endpoints.
 CSRF_TRUSTED_ORIGINS = [
-    f"http://{host}:8000" for host in ALLOWED_HOSTS if host[0].isdigit()  # noqa: F405
+    f"http://{host}:8000" for host in ALLOWED_HOSTS if host and host[0].isdigit()  # noqa: F405
+] + [
+    "https://*.trycloudflare.com",
+    "http://*.trycloudflare.com",
 ]
+
+# When running behind Cloudflare Tunnel (or any reverse proxy terminating TLS),
+# accept the X-Forwarded-Proto header so Django detects HTTPS correctly.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True

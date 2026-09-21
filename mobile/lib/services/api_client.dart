@@ -74,7 +74,7 @@ class ApiClient {
 
   Future<http.Response> get(String endpoint) async {
     final uri = Uri.parse('$_baseUrl$endpoint');
-    final response = await http.get(uri, headers: _headers()).timeout(const Duration(seconds: 10));
+    final response = await http.get(uri, headers: _headers()).timeout(const Duration(seconds: 15));
     _saveCookies(response);
     return response;
   }
@@ -84,14 +84,14 @@ class ApiClient {
     final body = data != null ? json.encode(data) : null;
     final response = await http
         .post(uri, headers: _headers(isJson: true), body: body)
-        .timeout(const Duration(seconds: 12));
+        .timeout(const Duration(seconds: 15));
     _saveCookies(response);
     return response;
   }
 
   Future<http.Response> delete(String endpoint) async {
     final uri = Uri.parse('$_baseUrl$endpoint');
-    final response = await http.delete(uri, headers: _headers()).timeout(const Duration(seconds: 10));
+    final response = await http.delete(uri, headers: _headers()).timeout(const Duration(seconds: 15));
     _saveCookies(response);
     return response;
   }

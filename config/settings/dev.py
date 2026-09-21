@@ -16,4 +16,9 @@ STORAGES = {
 WHITENOISE_AUTOREFRESH = True
 
 # Any LAN origin may POST; there is no hostile origin on a flat's WiFi.
-CSRF_TRUSTED_ORIGINS = [f"http://{host}:8000" for host in ALLOWED_HOSTS if host != "*"]
+CSRF_TRUSTED_ORIGINS = [f"http://{host}:8000" for host in ALLOWED_HOSTS if host != "*"] + [
+    "https://*.trycloudflare.com",
+    "http://*.trycloudflare.com",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

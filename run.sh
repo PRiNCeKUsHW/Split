@@ -27,9 +27,40 @@ echo "  On this machine:  http://127.0.0.1:8000"
 echo "  From a phone:     http://${IP}:8000"
 echo
 
+TUNNEL_PID=""
+cleanup() {
+  if [ -n "$TUNNEL_PID" ]; then
+    kill "$TUNNEL_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT INT TERM
+
+ENABLE_TUNNEL=0
+for arg in "$@"; do
+  if [ "$arg" = "--tunnel" ]; then
+    ENABLE_TUNNEL=1
+  fi
+done
+if [ "${TUNNEL:-0}" = "1" ]; then
+  ENABLE_TUNNEL=1
+fi
+
+if [ "$ENABLE_TUNNEL" -eq 1 ]; then
+  if command -v cloudflared >/dev/null 2>&1; then
+    echo "  Starting Cloudflare Tunnel (look for the .trycloudflare.com URL below)..."
+    echo
+    cloudflared tunnel --url http://127.0.0.1:8000 &
+    TUNNEL_PID=$!
+    sleep 2
+  else
+    echo "  [!] 'cloudflared' not found. Run 'pkg install cloudflared' on Termux."
+    echo
+  fi
+fi
+
 # Gunicorn has no Windows support; Waitress is the stand-in there.
 if "$PYTHON" -c "import gunicorn" 2>/dev/null; then
-  exec "$PYTHON" -m gunicorn config.wsgi:application \
+  "$PYTHON" -m gunicorn config.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers 3 \
     --threads 2 \
@@ -38,5 +69,6 @@ if "$PYTHON" -c "import gunicorn" 2>/dev/null; then
     --error-logfile -
 else
   echo "Gunicorn not available (Windows?) — using Waitress."
-  exec "$PYTHON" -m waitress --host=0.0.0.0 --port=8000 config.wsgi:application
+  "$PYTHON" -m waitress --host=0.0.0.0 --port=8000 config.wsgi:application
 fi
+

@@ -18,3 +18,4 @@ mobile/.dart_tool/
 mobile/.gradle/
 mobile/android/.gradle/
 mobile/android/local.properties
+*.apk

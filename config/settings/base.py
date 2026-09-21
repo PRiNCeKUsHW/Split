@@ -23,8 +23,15 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 
-# Whatever the .env names, plus every address this machine actually answers to.
-ALLOWED_HOSTS = list(dict.fromkeys(env("ALLOWED_HOSTS") + lan_hosts()))
+# Whatever the .env names, plus every address this machine actually answers to,
+# and Cloudflare quick tunnels (.trycloudflare.com).
+ALLOWED_HOSTS = list(
+    dict.fromkeys(
+        env("ALLOWED_HOSTS")
+        + lan_hosts()
+        + [".trycloudflare.com"]
+    )
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",

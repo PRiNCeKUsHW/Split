@@ -37,7 +37,16 @@ class _ServerConfigScreenState extends State<ServerConfigScreen> {
     });
 
     final appState = Provider.of<AppState>(context, listen: false);
-    final url = _urlController.text.trim();
+    var url = _urlController.text.trim();
+    if (url.isNotEmpty && !url.startsWith('http://') && !url.startsWith('https://')) {
+      if (url.contains('trycloudflare.com') || !url.contains(':')) {
+        url = 'https://$url';
+      } else {
+        url = 'http://$url';
+      }
+      _urlController.text = url;
+    }
+
     final success = await appState.setServerUrl(url);
     if (!mounted) return;
 
@@ -46,7 +55,7 @@ class _ServerConfigScreenState extends State<ServerConfigScreen> {
       _isSuccess = success;
       _statusMessage = success
           ? 'Connected successfully to FlatSplit server!'
-          : 'Could not connect. Check the IP and make sure server is running on port 8000.';
+          : 'Could not connect. Check the URL/IP and ensure server or Cloudflare tunnel is running.';
     });
 
     if (success && mounted) {
@@ -85,15 +94,15 @@ class _ServerConfigScreenState extends State<ServerConfigScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Text(
-                    'LAN SERVER (TERMUX / WI-FI)',
+                    'SERVER CONNECTION (WI-FI OR CLOUDFLARE)',
                     style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.black),
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'FlatSplit runs on your local Wi-Fi. The default server is your phone\'s Termux instance:\n\n'
-                    '• Termux (Default): http://192.168.1.4:8000\n'
-                    '• PC Wi-Fi Server: http://192.168.1.11:8000\n'
-                    '• Android Emulator: http://10.0.2.2:8000',
+                    'Connect on local Wi-Fi or from anywhere via Cloudflare Tunnel:\n\n'
+                    '• Cloudflare (Anywhere): https://xxx.trycloudflare.com\n'
+                    '• Termux (Local Wi-Fi): http://192.168.1.4:8000\n'
+                    '• PC Wi-Fi Server: http://192.168.1.11:8000',
                     style: TextStyle(fontSize: 13, color: Colors.black, height: 1.4, fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -124,7 +133,7 @@ class _ServerConfigScreenState extends State<ServerConfigScreen> {
             NeobrutalTextField(
               controller: _urlController,
               label: 'Host Address',
-              hint: 'http://192.168.1.4:8000',
+              hint: 'https://xxx.trycloudflare.com or http://192.168.1.4:8000',
               keyboardType: TextInputType.url,
             ),
             const SizedBox(height: 8),
